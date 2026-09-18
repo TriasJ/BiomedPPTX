@@ -569,43 +569,6 @@
           </menu>
 
         </group>
-        <group id="HelpGroup"
-               label="Help"
-               getImage="GetImage">
-          
-          <menu id="HelpMenu"
-                getLabel="GetLabel"
-                getImage="GetImage"
-                getSupertip="GetSupertip"
-                size="large">
-            <button id="HelpButton"
-                    tag="Help"
-                    getLabel="GetLabel"
-                    getImage="GetImage"
-                    getSupertip="GetSupertip"
-                    onAction="OnAction"/>
-            <button id="TutorialButton"
-                    tag="Tutorial"
-                    getLabel="GetLabel"
-                    getImage="GetImage"
-                    getSupertip="GetSupertip"
-                    onAction="OnAction"/>
-            <button id="FeedbackButton"
-                    tag="Feedback"
-                    getLabel="GetLabel"
-                    getImage="GetImage"
-                    getSupertip="GetSupertip"
-                    onAction="OnAction"/>
-            <button id="AboutButton"
-                    tag="About"
-                    getLabel="GetLabel"
-                    getImage="GetImage"
-                    getSupertip="GetSupertip"
-                    onAction="OnAction"/>
-          </menu>
-          
-        </group>
-        
         <group id="BiomedBrowserGroup" label="Biomedical">
           <button id="SmartBrowserButton"
                   tag="SmartBrowser"
@@ -645,7 +608,44 @@
                     supertip="Compress images during image-related functions. These functions are:&#xD;- Effects Lab functions&#xD;- Zoom Lab functions&#xD;- Crop To Shape (Crop Lab)" 
                     onAction="ToggleImageCompression" getPressed="SetImageCompression"/>
         </group>
-        
+
+        <group id="HelpGroup"
+               label="Help"
+               getImage="GetImage">
+
+          <menu id="HelpMenu"
+                getLabel="GetLabel"
+                getImage="GetImage"
+                getSupertip="GetSupertip"
+                size="large">
+            <button id="HelpButton"
+                    tag="Help"
+                    getLabel="GetLabel"
+                    getImage="GetImage"
+                    getSupertip="GetSupertip"
+                    onAction="OnAction"/>
+            <button id="TutorialButton"
+                    tag="Tutorial"
+                    getLabel="GetLabel"
+                    getImage="GetImage"
+                    getSupertip="GetSupertip"
+                    onAction="OnAction"/>
+            <button id="FeedbackButton"
+                    tag="Feedback"
+                    getLabel="GetLabel"
+                    getImage="GetImage"
+                    getSupertip="GetSupertip"
+                    onAction="OnAction"/>
+            <button id="AboutButton"
+                    tag="About"
+                    getLabel="GetLabel"
+                    getImage="GetImage"
+                    getSupertip="GetSupertip"
+                    onAction="OnAction"/>
+          </menu>
+
+        </group>
+
       </tab>
     </tabs>
   </ribbon>
