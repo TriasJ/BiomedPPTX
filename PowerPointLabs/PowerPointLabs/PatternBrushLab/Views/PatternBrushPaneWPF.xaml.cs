@@ -172,6 +172,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
                 float scatter = (float)scatterSlider.Value;
                 float jitter = (float)jitterSlider.Value;
+                float angleOffset = (float)angleOffsetSlider.Value;
 
                 if (_selectedPattern.Axis == "both")
                 {
@@ -191,7 +192,8 @@ namespace PowerPointLabs.PatternBrushLab.Views
                         _selectedPattern.TileWidth,
                         overlap,
                         scatterPt: scatter,
-                        rotationJitterDeg: jitter);
+                        rotationJitterDeg: jitter,
+                        rotationOffset: angleOffset);
                 }
 
                 if (placements.Count == 0) return;
@@ -283,6 +285,14 @@ namespace PowerPointLabs.PatternBrushLab.Views
             if (overlapValueText != null)
             {
                 overlapValueText.Text = $"{(int)overlapSlider.Value} pt";
+            }
+        }
+
+        private void AngleOffsetSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (angleOffsetValueText != null)
+            {
+                angleOffsetValueText.Text = $"{(int)angleOffsetSlider.Value} deg";
             }
         }
 

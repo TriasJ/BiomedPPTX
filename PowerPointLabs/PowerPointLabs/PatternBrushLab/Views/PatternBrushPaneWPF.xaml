@@ -99,6 +99,22 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Angle:" FontSize="11" VerticalAlignment="Center"
+                           Foreground="#666666"
+                           ToolTip="Fixed rotation offset from path tangent (degrees). Use 0 for along-path, -90 or 90 for perpendicular."/>
+                <Slider x:Name="angleOffsetSlider" Grid.Column="1" Minimum="-180" Maximum="180" Value="0"
+                        Margin="6,0,6,0" VerticalAlignment="Center"
+                        ValueChanged="AngleOffsetSlider_ValueChanged"
+                        TickFrequency="15" IsSnapToTickEnabled="True"/>
+                <TextBlock x:Name="angleOffsetValueText" Grid.Column="2" FontSize="11"
+                           VerticalAlignment="Center" Foreground="#666666" Text="0 deg"/>
+            </Grid>
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="Scatter:" FontSize="11" VerticalAlignment="Center"
                            Foreground="#666666"
                            ToolTip="Random perpendicular offset from path center (points)"/>
