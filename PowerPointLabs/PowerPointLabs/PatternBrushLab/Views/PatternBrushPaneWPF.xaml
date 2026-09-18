@@ -93,6 +93,38 @@
                 <TextBlock x:Name="overlapValueText" Grid.Column="2" FontSize="11"
                            VerticalAlignment="Center" Foreground="#666666" Text="10 pt"/>
             </Grid>
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Scatter:" FontSize="11" VerticalAlignment="Center"
+                           Foreground="#666666"
+                           ToolTip="Random perpendicular offset from path center (points)"/>
+                <Slider x:Name="scatterSlider" Grid.Column="1" Minimum="0" Maximum="50" Value="0"
+                        Margin="6,0,6,0" VerticalAlignment="Center"
+                        ValueChanged="ScatterSlider_ValueChanged"
+                        TickFrequency="1" IsSnapToTickEnabled="True"/>
+                <TextBlock x:Name="scatterValueText" Grid.Column="2" FontSize="11"
+                           VerticalAlignment="Center" Foreground="#666666" Text="0 pt"/>
+            </Grid>
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Jitter:" FontSize="11" VerticalAlignment="Center"
+                           Foreground="#666666"
+                           ToolTip="Random rotation offset (degrees)"/>
+                <Slider x:Name="jitterSlider" Grid.Column="1" Minimum="0" Maximum="90" Value="0"
+                        Margin="6,0,6,0" VerticalAlignment="Center"
+                        ValueChanged="JitterSlider_ValueChanged"
+                        TickFrequency="5" IsSnapToTickEnabled="True"/>
+                <TextBlock x:Name="jitterValueText" Grid.Column="2" FontSize="11"
+                           VerticalAlignment="Center" Foreground="#666666" Text="0 deg"/>
+            </Grid>
         </StackPanel>
 
         <!-- Brush mode toggle -->

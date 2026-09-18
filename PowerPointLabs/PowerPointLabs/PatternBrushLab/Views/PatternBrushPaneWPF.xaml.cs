@@ -170,6 +170,9 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
                 List<TilePlacement> placements;
 
+                float scatter = (float)scatterSlider.Value;
+                float jitter = (float)jitterSlider.Value;
+
                 if (_selectedPattern.Axis == "both")
                 {
                     var bounds = new RectangleF(shape.Left, shape.Top, shape.Width, shape.Height);
@@ -186,7 +189,9 @@ namespace PowerPointLabs.PatternBrushLab.Views
                     placements = _tilingEngine.ComputePlacements(
                         pathPoints,
                         _selectedPattern.TileWidth,
-                        overlap);
+                        overlap,
+                        scatterPt: scatter,
+                        rotationJitterDeg: jitter);
                 }
 
                 if (placements.Count == 0) return;
@@ -278,6 +283,22 @@ namespace PowerPointLabs.PatternBrushLab.Views
             if (overlapValueText != null)
             {
                 overlapValueText.Text = $"{(int)overlapSlider.Value} pt";
+            }
+        }
+
+        private void ScatterSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (scatterValueText != null)
+            {
+                scatterValueText.Text = $"{(int)scatterSlider.Value} pt";
+            }
+        }
+
+        private void JitterSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (jitterValueText != null)
+            {
+                jitterValueText.Text = $"{(int)jitterSlider.Value} deg";
             }
         }
 

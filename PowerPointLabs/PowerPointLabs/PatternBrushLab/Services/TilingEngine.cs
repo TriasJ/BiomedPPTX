@@ -13,15 +13,23 @@ namespace PowerPointLabs.PatternBrushLab.Services
 
     public class TilingEngine
     {
+        private Random _rng;
+
         public List<TilePlacement> ComputePlacements(
             List<PointF> pathPoints,
             float tileWidth,
-            float overlapPt)
+            float overlapPt,
+            float scatterPt = 0,
+            float rotationJitterDeg = 0,
+            float rotationOffset = 0,
+            int seed = 42)
         {
             if (pathPoints == null || pathPoints.Count < 2 || tileWidth <= 0)
             {
                 return new List<TilePlacement>();
             }
+
+            _rng = new Random(seed);
 
             float step = tileWidth - overlapPt;
             if (step <= 0)
@@ -44,10 +52,28 @@ namespace PowerPointLabs.PatternBrushLab.Services
                 }
 
                 var result = SampleAtDistance(pathPoints, arcLengths, distance);
+                PointF pos = result.Item1;
+                float tangentAngle = result.Item2;
+
+                if (scatterPt > 0)
+                {
+                    float perpRad = (float)((tangentAngle + 90) * Math.PI / 180.0);
+                    float offset = (float)(_rng.NextDouble() * 2 - 1) * scatterPt;
+                    pos = new PointF(
+                        pos.X + offset * (float)Math.Cos(perpRad),
+                        pos.Y + offset * (float)Math.Sin(perpRad));
+                }
+
+                float finalRotation = tangentAngle + rotationOffset;
+                if (rotationJitterDeg > 0)
+                {
+                    finalRotation += (float)(_rng.NextDouble() * 2 - 1) * rotationJitterDeg;
+                }
+
                 placements.Add(new TilePlacement
                 {
-                    Position = result.Item1,
-                    RotationDegrees = result.Item2,
+                    Position = pos,
+                    RotationDegrees = finalRotation,
                     Index = i
                 });
             }
