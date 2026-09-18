@@ -44,6 +44,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
         private ShapeInserter _shapeInserter;
         private TilingEngine _tilingEngine;
         private PathExtractor _pathExtractor;
+        private BrushModeController _brushController;
         private string _basePath;
         private ObservableCollection<PatternViewModel> _patterns;
         private PatternViewModel _selectedPattern;
@@ -55,6 +56,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
             _patterns = new ObservableCollection<PatternViewModel>();
             _tilingEngine = new TilingEngine();
             _pathExtractor = new PathExtractor();
+            _brushController = new BrushModeController();
             patternList.ItemsSource = _patterns;
         }
 
@@ -314,7 +316,77 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         private void AutoConvert_Changed(object sender, RoutedEventArgs e)
         {
-            // TODO: Wire up BrushModeController for auto-convert
+            if (autoConvertToggle.IsChecked == true && _selectedPattern != null)
+            {
+                _brushController.Activate(OnNewShapeDrawn);
+            }
+            else
+            {
+                _brushController.Deactivate();
+            }
+        }
+
+        private void OnNewShapeDrawn(PowerPoint.Shape shape)
+        {
+            if (_selectedPattern == null) return;
+
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var slide = app.ActiveWindow.View.Slide as PowerPoint.Slide;
+                if (slide == null) return;
+
+                var pathPoints = _pathExtractor.ExtractPath(shape);
+                float overlap = (float)overlapSlider.Value;
+                float scatter = (float)scatterSlider.Value;
+                float jitter = (float)jitterSlider.Value;
+                float angleOffset = (float)angleOffsetSlider.Value;
+
+                var placements = _tilingEngine.ComputePlacements(
+                    pathPoints, _selectedPattern.TileWidth, overlap,
+                    scatterPt: scatter, rotationJitterDeg: jitter,
+                    rotationOffset: angleOffset);
+
+                if (placements.Count == 0) return;
+
+                var tileItem = new IllustrationItem
+                {
+                    PptxFile = _selectedPattern.PptxFile,
+                    PptxSlide = _selectedPattern.PptxSlide,
+                    PptxShapeIndex = _selectedPattern.PptxShapeIndex,
+                    Name = _selectedPattern.Name
+                };
+
+                PowerPoint.Shape firstTile = _shapeInserter.InsertTileFromSource(tileItem, slide, app);
+                if (firstTile == null) return;
+
+                firstTile.Left = placements[0].Position.X - _selectedPattern.TileWidth / 2;
+                firstTile.Top = placements[0].Position.Y - _selectedPattern.TileHeight / 2;
+                firstTile.Rotation = placements[0].RotationDegrees;
+
+                var tileNames = new List<string> { firstTile.Name };
+                for (int i = 1; i < placements.Count; i++)
+                {
+                    PowerPoint.Shape dup = firstTile.Duplicate()[1];
+                    dup.Left = placements[i].Position.X - _selectedPattern.TileWidth / 2;
+                    dup.Top = placements[i].Position.Y - _selectedPattern.TileHeight / 2;
+                    dup.Rotation = placements[i].RotationDegrees;
+                    tileNames.Add(dup.Name);
+                }
+
+                if (tileNames.Count > 1)
+                {
+                    slide.Shapes.Range(tileNames.ToArray()).Group().Name =
+                        $"PatternBrush_{_selectedPattern.Name}";
+                }
+
+                shape.Delete();
+                selectedPatternText.Text = $"Auto-applied {placements.Count} tiles";
+            }
+            catch (Exception ex)
+            {
+                selectedPatternText.Text = "Auto-convert error: " + ex.Message;
+            }
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)

@@ -879,6 +879,34 @@
     <Compile Include="ShapesLab\Views\CustomShapePaneItem.xaml.cs">
       <DependentUpon>CustomShapePaneItem.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SmartBrowserLab\SmartBrowserPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SmartBrowserLab\SmartBrowserPane.Designer.cs">
+      <DependentUpon>SmartBrowserPane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SmartBrowserLab\Views\SmartBrowserPaneWPF.xaml.cs">
+      <DependentUpon>SmartBrowserPaneWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SmartBrowserLab\Models\SmartDatabase.cs" />
+    <Compile Include="SmartBrowserLab\Models\BioArtFetcher.cs" />
+    <Compile Include="SmartBrowserLab\Services\ShapeInserter.cs" />
+    <Compile Include="PatternBrushLab\PatternBrushPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PatternBrushLab\PatternBrushPane.Designer.cs">
+      <DependentUpon>PatternBrushPane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PatternBrushLab\Views\PatternBrushPaneWPF.xaml.cs">
+      <DependentUpon>PatternBrushPaneWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PatternBrushLab\Services\TilingEngine.cs" />
+    <Compile Include="PatternBrushLab\Services\PathExtractor.cs" />
+    <Compile Include="PatternBrushLab\Services\BrushModeController.cs" />
+    <Compile Include="ActionFramework\SmartBrowserLab\SmartBrowserActionHandler.cs" />
+    <Compile Include="ActionFramework\PatternBrushLab\PatternBrushActionHandler.cs" />
+    <Compile Include="TextCollection\SmartBrowserLabText.cs" />
+    <Compile Include="TextCollection\PatternBrushLabText.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelBottomFormat.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelTopFormat.cs" />
     <Compile Include="SyncLab\ObjectFormats\ContourColorFormat.cs" />
@@ -1929,6 +1957,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ShapesLab\Views\CustomShapePaneWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SmartBrowserLab\Views\SmartBrowserPaneWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PatternBrushLab\Views\PatternBrushPaneWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
