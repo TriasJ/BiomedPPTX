@@ -39,6 +39,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
     public partial class SmartBrowserPaneWPF : UserControl
     {
         private SmartDatabase _database;
+        private BioArtFetcher _bioArtFetcher;
         private ShapeInserter _shapeInserter;
         private string _basePath;
         private DispatcherTimer _searchDebounce;
@@ -65,6 +66,10 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                 _basePath = assetsBasePath;
                 _database = new SmartDatabase(dbPath, assetsBasePath);
                 _shapeInserter = new ShapeInserter(Path.Combine(assetsBasePath, ".."));
+
+                string bioArtIndex = FindBioArtIndex(assetsBasePath);
+                string bioArtCache = Path.Combine(ThisAddIn.AppDataFolder, "BioArtCache");
+                _bioArtFetcher = new BioArtFetcher(bioArtIndex, bioArtCache);
 
                 LoadCategories();
                 LoadTagFilters();
@@ -178,12 +183,56 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                     });
                 }
 
+                if (bioArtToggle.IsChecked == true && !string.IsNullOrWhiteSpace(searchQuery) && _bioArtFetcher != null)
+                {
+                    var bioArtResults = _bioArtFetcher.Search(searchQuery, 30);
+                    foreach (var ba in bioArtResults)
+                    {
+                        string displayName = ba.Title;
+                        if (displayName.Length > 30) displayName = displayName.Substring(0, 27) + "...";
+
+                        _illustrations.Add(new IllustrationViewModel
+                        {
+                            Id = ba.Id + 100000,
+                            Name = ba.Title,
+                            DisplayName = displayName,
+                            Description = $"{ba.Description} [BioArt - {ba.License}]",
+                            ThumbnailPath = "",
+                            SvgPath = "",
+                            PptxFile = "",
+                            PptxSlide = 0,
+                            PptxShapeIndex = 0,
+                            Width = 0,
+                            Height = 0,
+                            Topic = "BioArt",
+                            Source = "BioArt"
+                        });
+                    }
+                }
+
                 statusText.Text = $"Showing {_illustrations.Count} illustrations";
             }
             catch (Exception ex)
             {
                 statusText.Text = "Search error: " + ex.Message;
             }
+        }
+
+        private string FindBioArtIndex(string assetsBasePath)
+        {
+            string[] candidates = new[]
+            {
+                Path.Combine(assetsBasePath, "bioart_index.json"),
+                Path.Combine(ThisAddIn.AppDataFolder, "Assets", "bioart_index.json"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    ".claude", "skills", "fetch-media", "bioart_index.json")
+            };
+
+            foreach (string path in candidates)
+            {
+                if (File.Exists(path)) return path;
+            }
+            return candidates[0];
         }
 
         private void InsertSelectedShape(bool asEditable)
@@ -296,10 +345,18 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         private void BioArtToggle_Changed(object sender, RoutedEventArgs e)
         {
-            // TODO: Merge BioArt results when toggle is on
-            statusText.Text = bioArtToggle.IsChecked == true
-                ? "BioArt online search enabled"
-                : "BioArt offline";
+            if (_bioArtFetcher != null)
+            {
+                statusText.Text = bioArtToggle.IsChecked == true
+                    ? $"BioArt online enabled ({_bioArtFetcher.IndexCount} items)"
+                    : "BioArt offline";
+            }
+
+            if (!string.IsNullOrEmpty(searchBox?.Text))
+            {
+                _searchDebounce.Stop();
+                _searchDebounce.Start();
+            }
         }
 
         private void IllustrationList_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
