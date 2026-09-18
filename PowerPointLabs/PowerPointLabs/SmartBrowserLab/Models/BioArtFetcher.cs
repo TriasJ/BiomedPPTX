@@ -121,17 +121,49 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 .ToList();
         }
 
-        public string DownloadImage(BioArtItem item)
+        public string DownloadImage(BioArtItem item, string preferredFormat = "svg")
         {
             if (item.FileEndpoints == null || item.FileEndpoints.Count == 0)
             {
                 return null;
             }
 
-            string cachedPath = Path.Combine(_cachePath, $"bioart_{item.Id}.png");
-            if (File.Exists(cachedPath))
+            string[] cachedExts = { "svg", "png", "jpg" };
+            foreach (string ext in cachedExts)
             {
-                return cachedPath;
+                string cached = Path.Combine(_cachePath, $"bioart_{item.Id}.{ext}");
+                if (File.Exists(cached)) return cached;
+            }
+
+            string[] preferOrder = preferredFormat == "svg"
+                ? new[] { "svg", "png", "jpg" }
+                : new[] { "png", "svg", "jpg" };
+
+            foreach (string targetExt in preferOrder)
+            {
+                foreach (var endpoint in item.FileEndpoints)
+                {
+                    try
+                    {
+                        using (var client = new WebClient())
+                        {
+                            client.Headers.Add("User-Agent", "BiomedPPTX");
+                            byte[] data = client.DownloadData(endpoint.FileUrl);
+                            string ext = DetectFileType(data);
+
+                            if (ext == targetExt)
+                            {
+                                string filePath = Path.Combine(_cachePath, $"bioart_{item.Id}.{ext}");
+                                File.WriteAllBytes(filePath, data);
+                                return filePath;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
             }
 
             foreach (var endpoint in item.FileEndpoints)
@@ -142,7 +174,6 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     {
                         client.Headers.Add("User-Agent", "BiomedPPTX");
                         byte[] data = client.DownloadData(endpoint.FileUrl);
-
                         string ext = DetectFileType(data);
                         if (ext == "png" || ext == "jpg" || ext == "svg")
                         {
