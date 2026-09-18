@@ -1,0 +1,17 @@
+using System.Windows.Forms;
+
+namespace PowerPointLabs.PatternBrushLab
+{
+    public partial class PatternBrushPane : UserControl
+    {
+        public PatternBrushPane()
+        {
+            InitializeComponent();
+        }
+
+        public void InitBrush(string dbPath, string assetsBasePath)
+        {
+            PatternBrushPaneWPF1.Initialize(dbPath, assetsBasePath);
+        }
+    }
+}
