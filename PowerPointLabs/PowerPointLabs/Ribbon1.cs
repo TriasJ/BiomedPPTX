@@ -203,6 +203,11 @@ namespace PowerPointLabs
 
         public void RefreshRibbonControl(String controlId)
         {
+            if (_ribbon == null)
+            {
+                return;
+            }
+
             try
             {
                 _ribbon.InvalidateControl(controlId);
@@ -210,7 +215,6 @@ namespace PowerPointLabs
             catch (Exception e)
             {
                 Logger.LogException(e, "RefreshRibbonControl");
-                throw;
             }
         }
 
