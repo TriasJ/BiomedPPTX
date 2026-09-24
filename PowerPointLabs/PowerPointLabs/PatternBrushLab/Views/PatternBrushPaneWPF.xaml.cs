@@ -19,6 +19,8 @@ namespace PowerPointLabs.PatternBrushLab.Views
 {
     public partial class PatternBrushPaneWPF : UserControl
     {
+        public static SmartBrowserLab.Views.IllustrationViewModel PendingCustomPattern { get; set; }
+
         private SmartDatabase _database;
         private ShapeInserter _shapeInserter;
         private TilingEngine _tilingEngine;
@@ -53,6 +55,12 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 _shapeInserter = new ShapeInserter(Path.Combine(assetsBasePath, ".."));
                 LoadTileablePatterns();
                 _isInitialized = true;
+
+                if (PendingCustomPattern != null)
+                {
+                    AddCustomPattern(PendingCustomPattern);
+                    PendingCustomPattern = null;
+                }
             }
             catch (Exception ex)
             {
@@ -90,7 +98,8 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 }
 
                 var pathPoints = _pathExtractor.ExtractPath(shape);
-                float overlap = (float)overlapSlider.Value;
+                float overlapX = (float)offsetXSlider.Value;
+                float overlapY = (float)offsetYSlider.Value;
 
                 List<TilePlacement> placements;
 
@@ -101,8 +110,6 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 if (_selectedPattern.Axis == "both")
                 {
                     var bounds = new RectangleF(shape.Left, shape.Top, shape.Width, shape.Height);
-                    float overlapX = overlap > 0 ? overlap : 18f;
-                    float overlapY = overlap > 0 ? overlap * 0.67f : 12f;
                     float offsetPt = _selectedPattern.OffsetAmount > 0
                         ? _selectedPattern.OffsetAmount * (_selectedPattern.TileWidth / _selectedPattern.SvgWidth)
                         : _selectedPattern.TileWidth * 0.5f;
@@ -120,7 +127,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
                     placements = _tilingEngine.ComputePlacements(
                         pathPoints,
                         _selectedPattern.TileWidth,
-                        overlap,
+                        overlapX,
                         scatterPt: scatter,
                         rotationJitterDeg: jitter,
                         rotationOffset: angleOffset);
@@ -193,6 +200,35 @@ namespace PowerPointLabs.PatternBrushLab.Views
             }
         }
 
+        public void AddCustomPattern(SmartBrowserLab.Views.IllustrationViewModel item)
+        {
+            var pattern = new PatternViewModel
+            {
+                Id = item.Id,
+                Name = item.Name,
+                DisplayName = item.DisplayName,
+                ThumbnailPath = item.ThumbnailPath,
+                PptxFile = item.PptxFile,
+                PptxSlide = item.PptxSlide,
+                PptxShapeIndex = item.PptxShapeIndex,
+                Axis = "horizontal",
+                DefaultOverlap = 5,
+                TileWidth = item.Width > 0 ? item.Width : 50,
+                TileHeight = item.Height > 0 ? item.Height : 50,
+                OffsetRows = false,
+                OffsetAmount = 0,
+                SvgWidth = item.Width > 0 ? item.Width : 50,
+                BorderColor = "#9B59B6"
+            };
+
+            if (!_patterns.Any(p => p.Id == pattern.Id))
+            {
+                _patterns.Insert(0, pattern);
+            }
+
+            patternList.SelectedItem = pattern;
+        }
+
         #region Event Handlers
 
         private void PatternBrushPaneWPF_Loaded(object sender, RoutedEventArgs e)
@@ -224,21 +260,58 @@ namespace PowerPointLabs.PatternBrushLab.Views
             if (_selectedPattern != null)
             {
                 selectedPatternText.Text = string.Format("{0} ({1})", _selectedPattern.Name, _selectedPattern.Axis);
-                overlapSlider.Value = _selectedPattern.DefaultOverlap;
+                offsetXSlider.Value = _selectedPattern.DefaultOverlap;
                 applyButton.IsEnabled = true;
+
+                if (_selectedPattern.Axis == "both")
+                {
+                    offsetYGrid.Visibility = Visibility.Visible;
+                    offsetYSlider.Value = _selectedPattern.DefaultOverlap * 0.67;
+                }
+                else
+                {
+                    offsetYGrid.Visibility = Visibility.Collapsed;
+                }
             }
             else
             {
                 selectedPatternText.Text = "No pattern selected";
                 applyButton.IsEnabled = false;
+                offsetYGrid.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void OverlapSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void OffsetXSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (overlapValueText != null)
+            if (offsetXValueText != null)
             {
-                overlapValueText.Text = (int)overlapSlider.Value + " pt";
+                offsetXValueText.Text = string.Format("{0} pt", (int)offsetXSlider.Value);
+            }
+        }
+
+        private void OffsetYSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (offsetYValueText != null)
+            {
+                offsetYValueText.Text = string.Format("{0} pt", (int)offsetYSlider.Value);
+            }
+        }
+
+        private void DrawButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeScribble");
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeFreeform");
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 
@@ -441,7 +514,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 }
 
                 var pathPoints = _pathExtractor.ExtractPath(shape);
-                float overlap = (float)overlapSlider.Value;
+                float overlap = (float)offsetXSlider.Value;
                 float scatter = (float)scatterSlider.Value;
                 float jitter = (float)jitterSlider.Value;
                 float angleOffset = (float)angleOffsetSlider.Value;

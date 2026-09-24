@@ -503,26 +503,8 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                 return;
             }
 
-            statusText.Text = "Pattern brush: " + selected.Name + " (coming soon)";
-        }
-
-        private void BrushMode_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeScribble");
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeFreeform");
-                }
-                catch (Exception)
-                {
-                    statusText.Text = "Could not activate freeform tool";
-                }
-            }
+            PatternBrushLab.Views.PatternBrushPaneWPF.PendingCustomPattern = selected;
+            statusText.Text = "Open Pattern Brush to tile: " + selected.Name;
         }
 
         #endregion
