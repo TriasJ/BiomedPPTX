@@ -123,8 +123,13 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 return null;
             }
 
+            string appDataAssets = Path.Combine(ThisAddIn.AppDataFolder, "Assets", "SMART-Lib");
+            string installDir = AppDomain.CurrentDomain.BaseDirectory;
+
             string[] searchPaths = new[]
             {
+                Path.Combine(installDir, "Assets", "SMART-Lib", pptxFileName),
+                Path.Combine(appDataAssets, pptxFileName),
                 Path.Combine(_smartLibBasePath, pptxFileName),
                 Path.Combine(_smartLibBasePath, "..", "SMART-Lib", pptxFileName),
                 Path.Combine(_smartLibBasePath, "..", pptxFileName),
@@ -150,8 +155,13 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 return null;
             }
 
+            string appDataAssets = Path.Combine(ThisAddIn.AppDataFolder, "Assets", "SMART-Library");
+            string installDir = AppDomain.CurrentDomain.BaseDirectory;
+
             string[] searchPaths = new[]
             {
+                Path.Combine(installDir, "Assets", "SMART-Library", relativePath),
+                Path.Combine(appDataAssets, relativePath),
                 Path.Combine(_smartLibBasePath, relativePath),
                 Path.Combine(_smartLibBasePath, "..", "SMART-Library", relativePath),
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "__Scratch", "SMART-Library", relativePath),

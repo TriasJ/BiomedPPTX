@@ -62,9 +62,9 @@ namespace PowerPointLabs.ActionFramework.SmartBrowserLab
         {
             string[] searchPaths = new[]
             {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "SMART-Library"),
                 Path.Combine(ThisAddIn.AppDataFolder, "Assets", "SMART-Library"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "__Scratch", "SMART-Library"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "SMART-Library")
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "__Scratch", "SMART-Library")
             };
 
             foreach (string path in searchPaths)
