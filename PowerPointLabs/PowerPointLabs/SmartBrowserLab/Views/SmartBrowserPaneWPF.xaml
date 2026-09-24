@@ -137,6 +137,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="statusText"
                        Grid.Column="0"
@@ -144,8 +145,16 @@
                        Foreground="#666666"
                        VerticalAlignment="Center"
                        Text="Ready"/>
-            <Button x:Name="insertButton"
+            <Button x:Name="brushModeButton"
                     Grid.Column="1"
+                    Content="Draw"
+                    Width="50" Height="26"
+                    FontSize="11"
+                    Margin="0,0,4,0"
+                    Click="BrushMode_Click"
+                    ToolTip="Activate freeform scribble tool to draw a path for tiling"/>
+            <Button x:Name="insertButton"
+                    Grid.Column="2"
                     Content="Insert"
                     Width="60" Height="26"
                     FontSize="11"

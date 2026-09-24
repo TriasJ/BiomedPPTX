@@ -21,7 +21,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string name)
+        public void OnPropertyChanged(string name)
         {
             if (PropertyChanged != null)
             {

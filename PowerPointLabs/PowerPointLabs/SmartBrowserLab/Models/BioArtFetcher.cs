@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,11 +15,20 @@ namespace PowerPointLabs.SmartBrowserLab.Models
         private readonly string _indexPath;
         private Dictionary<string, BioArtItem> _index;
         private readonly string _cachePath;
+        private DateTime _lastDownload;
+        private bool _isDownloading;
+        private const int RateLimitMs = 2000;
 
         public BioArtFetcher(string indexPath, string cachePath)
         {
             _indexPath = indexPath;
             _cachePath = cachePath;
+            _lastDownload = DateTime.MinValue;
+            _isDownloading = false;
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                | SecurityProtocolType.Tls11
+                | SecurityProtocolType.Tls;
 
             if (!Directory.Exists(_cachePath))
             {
@@ -120,78 +130,125 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 .ToList();
         }
 
-        public string DownloadImage(BioArtItem item, string preferredFormat = "svg")
+        public BioArtItem FindById(int id)
         {
-            if (item.FileEndpoints == null || item.FileEndpoints.Count == 0)
+            LoadIndex();
+            string key = id.ToString();
+            BioArtItem result;
+            if (_index.TryGetValue(key, out result))
             {
-                return null;
+                return result;
             }
 
-            string[] cachedExts = { "svg", "png", "jpg" };
-            foreach (string ext in cachedExts)
+            return null;
+        }
+
+        public string GetCachedPath(int bioArtId)
+        {
+            string[] exts = { "png", "svg", "jpg" };
+            foreach (string ext in exts)
             {
-                string cached = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
+                string cached = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", bioArtId, ext));
                 if (File.Exists(cached))
                 {
                     return cached;
                 }
             }
 
-            string[] preferOrder = preferredFormat == "svg"
-                ? new[] { "svg", "png", "jpg" }
-                : new[] { "png", "svg", "jpg" };
+            return null;
+        }
 
-            foreach (string targetExt in preferOrder)
+        public bool IsDownloading
+        {
+            get { return _isDownloading; }
+        }
+
+        public string DownloadImage(BioArtItem item, string preferredFormat = "svg")
+        {
+            if (item == null || item.FileEndpoints == null || item.FileEndpoints.Count == 0)
             {
+                return null;
+            }
+
+            string existing = GetCachedPath(item.Id);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            _isDownloading = true;
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                    | SecurityProtocolType.Tls11
+                    | SecurityProtocolType.Tls;
+
+                EnforceRateLimit();
+
+                string[] preferOrder = preferredFormat == "svg"
+                    ? new[] { "svg", "png", "jpg" }
+                    : new[] { "png", "svg", "jpg" };
+
+                foreach (string targetExt in preferOrder)
+                {
+                    foreach (var endpoint in item.FileEndpoints)
+                    {
+                        try
+                        {
+                            using (var client = new WebClient())
+                            {
+                                client.Headers.Add("User-Agent", "BiomedPPTX/1.0");
+                                byte[] data = client.DownloadData(endpoint.FileUrl);
+                                string ext = DetectFileType(data);
+
+                                if (ext == targetExt)
+                                {
+                                    string filePath = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
+                                    File.WriteAllBytes(filePath, data);
+                                    _lastDownload = DateTime.Now;
+                                    return filePath;
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                EnforceRateLimit();
+
                 foreach (var endpoint in item.FileEndpoints)
                 {
                     try
                     {
                         using (var client = new WebClient())
                         {
-                            client.Headers.Add("User-Agent", "BiomedPPTX");
+                            client.Headers.Add("User-Agent", "BiomedPPTX/1.0");
                             byte[] data = client.DownloadData(endpoint.FileUrl);
                             string ext = DetectFileType(data);
-
-                            if (ext == targetExt)
+                            if (ext == "png" || ext == "jpg" || ext == "svg")
                             {
                                 string filePath = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
                                 File.WriteAllBytes(filePath, data);
+                                _lastDownload = DateTime.Now;
                                 return filePath;
                             }
                         }
                     }
-                    catch
+                    catch (Exception)
                     {
                         continue;
                     }
                 }
-            }
 
-            foreach (var endpoint in item.FileEndpoints)
+                return null;
+            }
+            finally
             {
-                try
-                {
-                    using (var client = new WebClient())
-                    {
-                        client.Headers.Add("User-Agent", "BiomedPPTX");
-                        byte[] data = client.DownloadData(endpoint.FileUrl);
-                        string ext = DetectFileType(data);
-                        if (ext == "png" || ext == "jpg" || ext == "svg")
-                        {
-                            string filePath = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
-                            File.WriteAllBytes(filePath, data);
-                            return filePath;
-                        }
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
+                _isDownloading = false;
             }
-
-            return null;
         }
 
         public int IndexCount
@@ -200,6 +257,16 @@ namespace PowerPointLabs.SmartBrowserLab.Models
             {
                 LoadIndex();
                 return _index.Count;
+            }
+        }
+
+        private void EnforceRateLimit()
+        {
+            TimeSpan elapsed = DateTime.Now - _lastDownload;
+            if (elapsed.TotalMilliseconds < RateLimitMs)
+            {
+                int waitMs = RateLimitMs - (int)elapsed.TotalMilliseconds;
+                Thread.Sleep(waitMs);
             }
         }
 
