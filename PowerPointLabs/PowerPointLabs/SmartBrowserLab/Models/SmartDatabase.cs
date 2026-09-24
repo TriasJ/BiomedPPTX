@@ -12,42 +12,24 @@ namespace PowerPointLabs.SmartBrowserLab.Models
     {
         private SQLiteConnection _conn;
         private readonly string _basePath;
+        private bool _hasFts5;
 
         public SmartDatabase(string dbPath, string basePath)
         {
             _basePath = basePath;
             _conn = new SQLiteConnection(string.Format("Data Source={0};Version=3;Read Only=True;", dbPath));
             _conn.Open();
+            _hasFts5 = CheckFts5Support();
         }
 
         public List<IllustrationItem> Search(string query, int limit = 100)
         {
-            const string sql = @"
-                SELECT i.id, i.name, i.description, i.pptx_file, i.pptx_slide, i.pptx_shape_index,
-                       i.svg_path, i.png_path, i.width, i.height,
-                       tp.name as topic, sl.title as slide_title
-                FROM search s
-                JOIN illustrations i ON i.id = s.rowid
-                JOIN slides sl ON i.slide_id = sl.id
-                JOIN topics tp ON sl.topic_id = tp.id
-                WHERE search MATCH @query
-                ORDER BY rank
-                LIMIT @limit";
-
-            var results = new List<IllustrationItem>();
-            using (var cmd = new SQLiteCommand(sql, _conn))
+            if (_hasFts5)
             {
-                cmd.Parameters.AddWithValue("@query", query);
-                cmd.Parameters.AddWithValue("@limit", limit);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        results.Add(ReadIllustration(reader));
-                    }
-                }
+                return SearchFts5(query, limit);
             }
-            return results;
+
+            return SearchLike(query, limit);
         }
 
         public List<IllustrationItem> GetByTopic(int topicId, int offset = 0, int limit = 100)
@@ -203,6 +185,86 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 _conn.Close();
                 _conn.Dispose();
             }
+        }
+
+        private bool CheckFts5Support()
+        {
+            try
+            {
+                using (var cmd = new SQLiteCommand("SELECT count(*) FROM search LIMIT 1", _conn))
+                {
+                    cmd.ExecuteScalar();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private List<IllustrationItem> SearchFts5(string query, int limit)
+        {
+            const string sql = @"
+                SELECT i.id, i.name, i.description, i.pptx_file, i.pptx_slide, i.pptx_shape_index,
+                       i.svg_path, i.png_path, i.width, i.height,
+                       tp.name as topic, sl.title as slide_title
+                FROM search s
+                JOIN illustrations i ON i.id = s.rowid
+                JOIN slides sl ON i.slide_id = sl.id
+                JOIN topics tp ON sl.topic_id = tp.id
+                WHERE search MATCH @query
+                ORDER BY rank
+                LIMIT @limit";
+
+            var results = new List<IllustrationItem>();
+            using (var cmd = new SQLiteCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@query", query);
+                cmd.Parameters.AddWithValue("@limit", limit);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        results.Add(ReadIllustration(reader));
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        private List<IllustrationItem> SearchLike(string query, int limit)
+        {
+            string pattern = "%" + query.Replace(" ", "%") + "%";
+            const string sql = @"
+                SELECT i.id, i.name, i.description, i.pptx_file, i.pptx_slide, i.pptx_shape_index,
+                       i.svg_path, i.png_path, i.width, i.height,
+                       tp.name as topic, sl.title as slide_title
+                FROM illustrations i
+                JOIN slides sl ON i.slide_id = sl.id
+                JOIN topics tp ON sl.topic_id = tp.id
+                WHERE i.name LIKE @pattern
+                   OR i.description LIKE @pattern
+                   OR tp.name LIKE @pattern
+                ORDER BY i.name
+                LIMIT @limit";
+
+            var results = new List<IllustrationItem>();
+            using (var cmd = new SQLiteCommand(sql, _conn))
+            {
+                cmd.Parameters.AddWithValue("@pattern", pattern);
+                cmd.Parameters.AddWithValue("@limit", limit);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        results.Add(ReadIllustration(reader));
+                    }
+                }
+            }
+
+            return results;
         }
 
         private IllustrationItem ReadIllustration(SQLiteDataReader reader)
