@@ -74,7 +74,10 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
                 if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes)
                 {
-                    System.Windows.MessageBox.Show("Please select a line or freeform shape first.",
+                    string msg = _selectedPattern.Axis == "both"
+                        ? "Please select a shape to define the fill area."
+                        : "Please select a line or freeform shape first.";
+                    System.Windows.MessageBox.Show(msg,
                         "BiomedPPTX", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
@@ -98,13 +101,21 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 if (_selectedPattern.Axis == "both")
                 {
                     var bounds = new RectangleF(shape.Left, shape.Top, shape.Width, shape.Height);
+                    float overlapX = overlap > 0 ? overlap : 18f;
+                    float overlapY = overlap > 0 ? overlap * 0.67f : 12f;
+                    float offsetPt = _selectedPattern.OffsetAmount > 0
+                        ? _selectedPattern.OffsetAmount * (_selectedPattern.TileWidth / _selectedPattern.SvgWidth)
+                        : _selectedPattern.TileWidth * 0.5f;
+
                     placements = _tilingEngine.ComputeGridPlacements(
                         bounds,
                         _selectedPattern.TileWidth,
                         _selectedPattern.TileHeight,
-                        overlap, overlap,
+                        overlapX, overlapY,
                         _selectedPattern.OffsetRows,
-                        _selectedPattern.OffsetAmount * (_selectedPattern.TileWidth / 100f));
+                        offsetPt);
+
+                    shape.Delete();
                 }
                 else
                 {
@@ -354,6 +365,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
                     TileHeight = meta != null && meta.PptxHeight > 0 ? meta.PptxHeight : item.Height,
                     OffsetRows = meta != null ? meta.OffsetRows : false,
                     OffsetAmount = meta != null ? meta.OffsetAmount : 0,
+                    SvgWidth = meta != null && meta.SvgWidth > 0 ? meta.SvgWidth : item.Width,
                     BorderColor = borderColor
                 });
             }

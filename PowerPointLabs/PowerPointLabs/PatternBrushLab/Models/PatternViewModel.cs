@@ -30,6 +30,8 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         public float OffsetAmount { get; set; }
 
+        public float SvgWidth { get; set; }
+
         public string BorderColor { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
