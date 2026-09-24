@@ -99,7 +99,8 @@
                  ScrollViewer.CanContentScroll="True"
                  VirtualizingStackPanel.IsVirtualizing="True"
                  VirtualizingStackPanel.VirtualizationMode="Recycling"
-                 MouseDoubleClick="IllustrationList_DoubleClick">
+                 MouseDoubleClick="IllustrationList_DoubleClick"
+                 SelectionChanged="IllustrationList_SelectionChanged">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal"/>

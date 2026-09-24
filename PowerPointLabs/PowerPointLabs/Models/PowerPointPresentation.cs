@@ -279,11 +279,6 @@ namespace PowerPointLabs.Models
 
         public void AddAckSlide()
         {
-            if (!HasAckSlide())
-            {
-                PowerPointSlide lastSlide = Slides.Last();
-                lastSlide.CreateAckSlide();
-            }
         }
 
         /// <summary>

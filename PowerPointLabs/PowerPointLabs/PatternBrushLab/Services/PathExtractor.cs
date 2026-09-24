@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 
 using Microsoft.Office.Core;
+
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace PowerPointLabs.PatternBrushLab.Services
@@ -44,6 +45,7 @@ namespace PowerPointLabs.PatternBrushLab.Services
                 x1 = x2;
                 x2 = tmp;
             }
+
             if (shape.VerticalFlip == MsoTriState.msoTrue)
             {
                 float tmp = y1;
@@ -70,17 +72,17 @@ namespace PowerPointLabs.PatternBrushLab.Services
             for (int i = 1; i <= nodes.Count; i++)
             {
                 PowerPoint.ShapeNode node = nodes[i];
-                var pts = (object[,])node.Points;
-                float nx = Convert.ToSingle(pts[1, 1]) + offsetX;
-                float ny = Convert.ToSingle(pts[1, 2]) + offsetY;
+                PointF nodePoint = GetNodePoint(node, offsetX, offsetY);
+                float nx = nodePoint.X;
+                float ny = nodePoint.Y;
 
                 if (node.SegmentType == MsoSegmentType.msoSegmentCurve && i > 1)
                 {
                     PointF startPt = points[points.Count - 1];
-                    var controlPts = GetBezierControlPoints(nodes, i, offsetX, offsetY);
+                    PointF[] controlPts = GetBezierControlPoints(nodes, i, offsetX, offsetY);
                     if (controlPts != null)
                     {
-                        var curvePoints = SampleCubicBezier(
+                        List<PointF> curvePoints = SampleCubicBezier(
                             startPt, controlPts[0], controlPts[1], new PointF(nx, ny), BezierSamples);
                         for (int j = 1; j < curvePoints.Count; j++)
                         {
@@ -109,16 +111,31 @@ namespace PowerPointLabs.PatternBrushLab.Services
             return points;
         }
 
+        private PointF GetNodePoint(PowerPoint.ShapeNode node, float offsetX, float offsetY)
+        {
+            try
+            {
+                dynamic pts = node.Points;
+                float x = Convert.ToSingle(pts[1, 1]) + offsetX;
+                float y = Convert.ToSingle(pts[1, 2]) + offsetY;
+                return new PointF(x, y);
+            }
+            catch (Exception)
+            {
+                return new PointF(offsetX, offsetY);
+            }
+        }
+
         private PointF[] GetBezierControlPoints(PowerPoint.ShapeNodes nodes, int nodeIndex,
             float offsetX, float offsetY)
         {
             try
             {
                 PowerPoint.ShapeNode node = nodes[nodeIndex];
-                var pts = (object[,])node.Points;
+                dynamic pts = node.Points;
 
-                int rows = pts.GetLength(0);
-                if (rows >= 3)
+                Array arr = pts as Array;
+                if (arr != null && arr.GetLength(0) >= 3)
                 {
                     return new[]
                     {
@@ -127,9 +144,10 @@ namespace PowerPointLabs.PatternBrushLab.Services
                     };
                 }
             }
-            catch
+            catch (Exception)
             {
             }
+
             return null;
         }
 
@@ -144,6 +162,7 @@ namespace PowerPointLabs.PatternBrushLab.Services
                 float y = u * u * u * p0.Y + 3 * u * u * t * p1.Y + 3 * u * t * t * p2.Y + t * t * t * p3.Y;
                 result.Add(new PointF(x, y));
             }
+
             return result;
         }
 

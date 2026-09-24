@@ -267,7 +267,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                 }
                 else
                 {
-                    _shapeInserter.InsertAsPicture(item, slide, app);
+                    _shapeInserter.InsertAsSvg(item, slide, app);
                 }
 
                 statusText.Text = "Inserted: " + selected.Name;
@@ -372,6 +372,11 @@ namespace PowerPointLabs.SmartBrowserLab.Views
         private void IllustrationList_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             InsertSelectedShape(asEditable: true);
+        }
+
+        private void IllustrationList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            insertButton.IsEnabled = illustrationList.SelectedItem != null;
         }
 
         private void InsertButton_Click(object sender, RoutedEventArgs e)

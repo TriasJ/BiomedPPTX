@@ -24,16 +24,21 @@ namespace PowerPointLabs.SmartBrowserLab.Services
             PowerPoint.Slide targetSlide,
             PowerPoint.Application app)
         {
-            string pptxPath = Path.Combine(_smartLibBasePath, item.PptxFile);
-            if (!File.Exists(pptxPath))
+            if (string.IsNullOrEmpty(item.PptxFile) || item.PptxSlide <= 0)
             {
-                return InsertAsPicture(item, targetSlide, app);
+                return InsertAsSvg(item, targetSlide, app);
+            }
+
+            string pptxPath = FindPptxFile(item.PptxFile);
+            if (pptxPath == null)
+            {
+                return InsertAsSvg(item, targetSlide, app);
             }
 
             PowerPoint.Presentation srcPres = GetOrOpenPresentation(pptxPath, app);
             if (srcPres == null)
             {
-                return InsertAsPicture(item, targetSlide, app);
+                return InsertAsSvg(item, targetSlide, app);
             }
 
             try
@@ -42,6 +47,7 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 PowerPoint.Shape srcShape = srcSlide.Shapes[item.PptxShapeIndex];
 
                 srcShape.Copy();
+                System.Threading.Thread.Sleep(200);
                 var pastedRange = targetSlide.Shapes.Paste();
                 PowerPoint.Shape pasted = pastedRange[1];
 
@@ -52,38 +58,38 @@ namespace PowerPointLabs.SmartBrowserLab.Services
 
                 return pasted;
             }
-            catch
+            catch (Exception)
             {
-                return InsertAsPicture(item, targetSlide, app);
+                return InsertAsSvg(item, targetSlide, app);
             }
         }
 
-        public PowerPoint.Shape InsertAsPicture(
+        public PowerPoint.Shape InsertAsSvg(
             IllustrationItem item,
             PowerPoint.Slide targetSlide,
             PowerPoint.Application app)
         {
-            string svgPath = ResolvePath(item.SvgPath);
-            string pngPath = ResolvePath(item.PngPath);
-
-            string imagePath = File.Exists(svgPath) ? svgPath : pngPath;
-            if (!File.Exists(imagePath))
+            string svgPath = FindAssetFile(item.SvgPath);
+            if (svgPath != null)
             {
-                return null;
+                return InsertPictureFile(svgPath, targetSlide);
             }
 
-            PowerPoint.Shape shape = targetSlide.Shapes.AddPicture(
-                imagePath,
-                Microsoft.Office.Core.MsoTriState.msoFalse,
-                Microsoft.Office.Core.MsoTriState.msoTrue,
-                0, 0);
+            return InsertAsPng(item, targetSlide, app);
+        }
 
-            float slideWidth = targetSlide.CustomLayout.Width;
-            float slideHeight = targetSlide.CustomLayout.Height;
-            shape.Left = (slideWidth - shape.Width) / 2;
-            shape.Top = (slideHeight - shape.Height) / 2;
+        public PowerPoint.Shape InsertAsPng(
+            IllustrationItem item,
+            PowerPoint.Slide targetSlide,
+            PowerPoint.Application app)
+        {
+            string pngPath = FindAssetFile(item.PngPath);
+            if (pngPath != null)
+            {
+                return InsertPictureFile(pngPath, targetSlide);
+            }
 
-            return shape;
+            return null;
         }
 
         public PowerPoint.Shape InsertTileFromSource(
@@ -106,7 +112,77 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 {
                 }
             }
+
             _presentationCache.Clear();
+        }
+
+        private string FindPptxFile(string pptxFileName)
+        {
+            if (string.IsNullOrEmpty(pptxFileName))
+            {
+                return null;
+            }
+
+            string[] searchPaths = new[]
+            {
+                Path.Combine(_smartLibBasePath, pptxFileName),
+                Path.Combine(_smartLibBasePath, "..", "SMART-Lib", pptxFileName),
+                Path.Combine(_smartLibBasePath, "..", pptxFileName),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "__Scratch", "SMART-Lib", pptxFileName),
+            };
+
+            foreach (string path in searchPaths)
+            {
+                string fullPath = Path.GetFullPath(path);
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            return null;
+        }
+
+        private string FindAssetFile(string relativePath)
+        {
+            if (string.IsNullOrEmpty(relativePath))
+            {
+                return null;
+            }
+
+            string[] searchPaths = new[]
+            {
+                Path.Combine(_smartLibBasePath, relativePath),
+                Path.Combine(_smartLibBasePath, "..", "SMART-Library", relativePath),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "__Scratch", "SMART-Library", relativePath),
+            };
+
+            foreach (string path in searchPaths)
+            {
+                string fullPath = Path.GetFullPath(path);
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            return null;
+        }
+
+        private PowerPoint.Shape InsertPictureFile(string filePath, PowerPoint.Slide targetSlide)
+        {
+            PowerPoint.Shape shape = targetSlide.Shapes.AddPicture(
+                filePath,
+                Microsoft.Office.Core.MsoTriState.msoFalse,
+                Microsoft.Office.Core.MsoTriState.msoTrue,
+                0, 0);
+
+            float slideWidth = targetSlide.CustomLayout.Width;
+            float slideHeight = targetSlide.CustomLayout.Height;
+            shape.Left = (slideWidth - shape.Width) / 2;
+            shape.Top = (slideHeight - shape.Height) / 2;
+
+            return shape;
         }
 
         private PowerPoint.Presentation GetOrOpenPresentation(string pptxPath, PowerPoint.Application app)
@@ -139,16 +215,6 @@ namespace PowerPointLabs.SmartBrowserLab.Services
             {
                 return null;
             }
-        }
-
-        private string ResolvePath(string relativePath)
-        {
-            if (string.IsNullOrEmpty(relativePath))
-            {
-                return "";
-            }
-
-            return Path.Combine(_smartLibBasePath, relativePath);
         }
     }
 }

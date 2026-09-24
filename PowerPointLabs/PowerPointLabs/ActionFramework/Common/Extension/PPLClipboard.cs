@@ -87,7 +87,8 @@ namespace PowerPointLabs.ActionFramework.Common.Extension
             }
             catch (Exception e)
             {
-                throw e;
+                System.Diagnostics.Debug.WriteLine("PPLClipboard.LockAndRelease error: " + e.Message);
+                return default(TResult);
             }
             finally
             {
@@ -97,25 +98,54 @@ namespace PowerPointLabs.ActionFramework.Common.Extension
 
         public void LockClipboard()
         {
-            if (IsLocked)
+            if (_parentWindow == IntPtr.Zero)
             {
-                throw new Exception("Clipboard is not released before locking!");
-            }
-            // wait to lock the clipboard
-            while (!IsClipboardFree() && !OpenClipboard(_parentWindow))
-            {
-                if (!AutoDismiss)
+                try
                 {
-                    MessageBox.Show("Another application is currently using the clipboard. Please come back later and try again", "Retry", MessageBoxButton.OK);
+                    _parentWindow = new IntPtr(Globals.ThisAddIn.Application.HWND);
+                }
+                catch (Exception)
+                {
                 }
             }
-            IsLocked = true;
+
+            if (IsLocked)
+            {
+                return;
+            }
+
+            try
+            {
+                int attempts = 0;
+                while (!IsClipboardFree() && !OpenClipboard(_parentWindow) && attempts < 10)
+                {
+                    System.Threading.Thread.Sleep(50);
+                    attempts++;
+                }
+
+                IsLocked = true;
+            }
+            catch (Exception)
+            {
+                IsLocked = false;
+            }
         }
 
         public void ReleaseClipboard()
         {
-            if (!IsLocked) { return; }
-            CloseClipboard();
+            if (!IsLocked)
+            {
+                return;
+            }
+
+            try
+            {
+                CloseClipboard();
+            }
+            catch (Exception)
+            {
+            }
+
             IsLocked = false;
         }
 
