@@ -200,7 +200,27 @@ namespace PowerPointLabs
 
         public string GetCustomUI(string ribbonId)
         {
+            EnsureFactoriesInitialized();
             return GetResourceText("PowerPointLabs.Ribbon1.xml");
+        }
+
+        private void EnsureFactoriesInitialized()
+        {
+            if (ActionHandlerFactory != null)
+            {
+                return;
+            }
+
+            ActionHandlerFactory = new ActionHandlerFactory();
+            EnabledHandlerFactory = new EnabledHandlerFactory();
+            LabelHandlerFactory = new LabelHandlerFactory();
+            SupertipHandlerFactory = new SupertipHandlerFactory();
+            ImageHandlerFactory = new ImageHandlerFactory();
+            ContentHandlerFactory = new ContentHandlerFactory();
+            PressedHandlerFactory = new PressedHandlerFactory();
+            CheckBoxActionHandlerFactory = new CheckBoxActionHandlerFactory();
+            DisableFormatTab = new Boolean();
+            ShouldCompressImages = new Boolean();
         }
 
         #endregion
