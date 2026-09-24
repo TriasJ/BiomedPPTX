@@ -63,57 +63,126 @@ namespace PowerPointLabs
 
         public void OnAction(Office.IRibbonControl control)
         {
+            if (ActionHandlerFactory == null)
+            {
+                return;
+            }
+
             ActionFramework.Common.Interface.ActionHandler actionHandler = ActionHandlerFactory.CreateInstance(control.Id, control.Tag);
-            actionHandler.Execute(control.Id);
+            if (actionHandler != null)
+            {
+                actionHandler.Execute(control.Id);
+            }
         }
 
         public bool GetEnabled(Office.IRibbonControl control)
         {
-            if (IsAnyWindowOpen())
-            {
-                ActionFramework.Common.Interface.EnabledHandler enabledHandler = EnabledHandlerFactory.CreateInstance(control.Id, control.Tag);
-                return enabledHandler.Get(control.Id);
-            } 
-            else 
+            if (EnabledHandlerFactory == null || !IsAnyWindowOpen())
             {
                 return false;
             }
+
+            ActionFramework.Common.Interface.EnabledHandler enabledHandler = EnabledHandlerFactory.CreateInstance(control.Id, control.Tag);
+            if (enabledHandler != null)
+            {
+                return enabledHandler.Get(control.Id);
+            }
+
+            return true;
         }
 
         public string GetLabel(Office.IRibbonControl control)
         {
+            if (LabelHandlerFactory == null)
+            {
+                return "";
+            }
+
             ActionFramework.Common.Interface.LabelHandler labelHandler = LabelHandlerFactory.CreateInstance(control.Id, control.Tag);
-            return labelHandler.Get(control.Id);
+            if (labelHandler != null)
+            {
+                return labelHandler.Get(control.Id);
+            }
+
+            return "";
         }
 
         public string GetSupertip(Office.IRibbonControl control)
         {
+            if (SupertipHandlerFactory == null)
+            {
+                return "";
+            }
+
             ActionFramework.Common.Interface.SupertipHandler supertipHandler = SupertipHandlerFactory.CreateInstance(control.Id, control.Tag);
-            return supertipHandler.Get(control.Id);
+            if (supertipHandler != null)
+            {
+                return supertipHandler.Get(control.Id);
+            }
+
+            return "";
         }
 
         public Bitmap GetImage(Office.IRibbonControl control)
         {
+            if (ImageHandlerFactory == null)
+            {
+                return null;
+            }
+
             ActionFramework.Common.Interface.ImageHandler imageHandler = ImageHandlerFactory.CreateInstance(control.Id, control.Tag);
-            return imageHandler.Get(control.Id);
+            if (imageHandler != null)
+            {
+                return imageHandler.Get(control.Id);
+            }
+
+            return null;
         }
 
         public string GetContent(Office.IRibbonControl control)
         {
+            if (ContentHandlerFactory == null)
+            {
+                return "";
+            }
+
             ActionFramework.Common.Interface.ContentHandler contentHandler = ContentHandlerFactory.CreateInstance(control.Id, control.Tag);
-            return contentHandler.Get(control.Id);
+            if (contentHandler != null)
+            {
+                return contentHandler.Get(control.Id);
+            }
+
+            return "";
         }
 
         public bool GetPressed(Office.IRibbonControl control)
         {
+            if (PressedHandlerFactory == null)
+            {
+                return false;
+            }
+
             ActionFramework.Common.Interface.PressedHandler pressedHandler = PressedHandlerFactory.CreateInstance(control.Id, control.Tag);
-            return pressedHandler.Get(control.Id);
+            if (pressedHandler != null)
+            {
+                return pressedHandler.Get(control.Id);
+            }
+
+            return false;
         }
 
         public void OnCheckBoxAction(Office.IRibbonControl control, bool pressed)
         {
+            if (CheckBoxActionHandlerFactory == null)
+            {
+                return;
+            }
+
             ActionFramework.Common.Interface.CheckBoxActionHandler checkBoxActionHandler = CheckBoxActionHandlerFactory.CreateInstance(control.Id, control.Tag);
-            checkBoxActionHandler.Execute(control.Id, pressed);
+            if (checkBoxActionHandler != null)
+            {
+                checkBoxActionHandler.Execute(control.Id, pressed);
+            }
         }
 
         #endregion
@@ -157,19 +226,29 @@ namespace PowerPointLabs
         public void ToggleImageCompression(Office.IRibbonControl control, bool pressed)
         {
             ShouldCompressImages = pressed;
-            _ribbon.InvalidateControl("ShouldCompressImagesCheckbox");
+            if (_ribbon != null)
+            {
+                _ribbon.InvalidateControl("ShouldCompressImagesCheckbox");
+            }
+
             GraphicsUtil.ShouldCompressPictureExport(ShouldCompressImages);
         }
 
 
         public void InitialiseVisibilityCheckbox()
         {
-            _ribbon.InvalidateControl("VisibleFormatShapes");
+            if (_ribbon != null)
+            {
+                _ribbon.InvalidateControl("VisibleFormatShapes");
+            }
         }
-        
+
         public void InitialiseCompressImagesCheckbox()
         {
-            _ribbon.InvalidateControl("ShouldCompressImagesCheckbox");
+            if (_ribbon != null)
+            {
+                _ribbon.InvalidateControl("ShouldCompressImagesCheckbox");
+            }
         }
 
         // Sets the default starting status of the checkbox (whether checked or not)
