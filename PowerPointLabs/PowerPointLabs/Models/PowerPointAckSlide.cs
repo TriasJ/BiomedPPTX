@@ -15,25 +15,6 @@ namespace PowerPointLabs.Models
 
         private PowerPointAckSlide(PowerPoint.Slide slide) : base(slide)
         {
-            if (!IsAckSlide(slide.Name))
-            {
-                _slide.Name = PptLabsAckSlideName;
-                String tempFileName = Path.GetTempFileName();
-                Properties.Resources.Acknowledgement.Save(tempFileName);
-                PowerPoint.Shape ackShape = _slide.Shapes.AddPicture(tempFileName, Office.MsoTriState.msoFalse, Office.MsoTriState.msoTrue, 0, 0);
-                _slide.SlideShowTransition.Hidden = Office.MsoTriState.msoTrue;
-
-                ackShape.Left = (PowerPointPresentation.Current.SlideWidth - ackShape.Width) / 2;
-                ackShape.Top = (PowerPointPresentation.Current.SlideHeight - ackShape.Height) / 2;
-
-                //_slide.NotesPage.Shapes
-                /*NotesPageText = teststr;
-                Debug.WriteLine(teststr.Length);
-                var output = NotesPageText;
-                Debug.WriteLine(output.Length);
-                //Debug.WriteLine("|" + output + "|");
-                Debug.WriteLine(output == teststr);*/
-            }
         }
 
         public static PowerPointSlide FromSlideFactory(PowerPoint.Slide slide)

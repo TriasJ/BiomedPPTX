@@ -218,6 +218,7 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                     ReadOnly: Microsoft.Office.Core.MsoTriState.msoTrue,
                     Untitled: Microsoft.Office.Core.MsoTriState.msoFalse,
                     WithWindow: Microsoft.Office.Core.MsoTriState.msoFalse);
+                pres.Saved = Microsoft.Office.Core.MsoTriState.msoTrue;
                 _presentationCache[pptxPath] = pres;
                 return pres;
             }

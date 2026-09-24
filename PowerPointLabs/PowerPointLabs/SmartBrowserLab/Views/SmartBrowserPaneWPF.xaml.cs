@@ -186,14 +186,27 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                             displayName = displayName.Substring(0, 27) + "...";
                         }
 
+                        string bioArtThumb = "";
+                        try
+                        {
+                            string downloaded = _bioArtFetcher.DownloadImage(ba);
+                            if (downloaded != null && File.Exists(downloaded))
+                            {
+                                bioArtThumb = downloaded;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+
                         _illustrations.Add(new IllustrationViewModel
                         {
                             Id = ba.Id + 100000,
                             Name = ba.Title,
-                            DisplayName = displayName,
+                            DisplayName = string.Format("[BioArt] {0}", displayName),
                             Description = string.Format("{0} [BioArt - {1}]", ba.Description, ba.License),
-                            ThumbnailPath = "",
-                            SvgPath = "",
+                            ThumbnailPath = bioArtThumb,
+                            SvgPath = bioArtThumb,
                             PptxFile = "",
                             PptxSlide = 0,
                             PptxShapeIndex = 0,
@@ -250,24 +263,39 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                     return;
                 }
 
-                var item = new IllustrationItem
+                if (selected.Source == "BioArt" && !string.IsNullOrEmpty(selected.ThumbnailPath) && File.Exists(selected.ThumbnailPath))
                 {
-                    Id = selected.Id,
-                    Name = selected.Name,
-                    PptxFile = selected.PptxFile,
-                    PptxSlide = selected.PptxSlide,
-                    PptxShapeIndex = selected.PptxShapeIndex,
-                    SvgPath = selected.SvgPath,
-                    PngPath = selected.ThumbnailPath
-                };
-
-                if (asEditable)
-                {
-                    _shapeInserter.InsertAsEditableShape(item, slide, app);
+                    PowerPoint.Shape bioShape = slide.Shapes.AddPicture(
+                        selected.ThumbnailPath,
+                        Microsoft.Office.Core.MsoTriState.msoFalse,
+                        Microsoft.Office.Core.MsoTriState.msoTrue,
+                        0, 0);
+                    float sw = slide.CustomLayout.Width;
+                    float sh = slide.CustomLayout.Height;
+                    bioShape.Left = (sw - bioShape.Width) / 2;
+                    bioShape.Top = (sh - bioShape.Height) / 2;
                 }
                 else
                 {
-                    _shapeInserter.InsertAsSvg(item, slide, app);
+                    var item = new IllustrationItem
+                    {
+                        Id = selected.Id,
+                        Name = selected.Name,
+                        PptxFile = selected.PptxFile,
+                        PptxSlide = selected.PptxSlide,
+                        PptxShapeIndex = selected.PptxShapeIndex,
+                        SvgPath = selected.SvgPath,
+                        PngPath = selected.ThumbnailPath
+                    };
+
+                    if (asEditable)
+                    {
+                        _shapeInserter.InsertAsEditableShape(item, slide, app);
+                    }
+                    else
+                    {
+                        _shapeInserter.InsertAsSvg(item, slide, app);
+                    }
                 }
 
                 statusText.Text = "Inserted: " + selected.Name;
