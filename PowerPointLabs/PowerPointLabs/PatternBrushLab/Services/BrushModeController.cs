@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Microsoft.Office.Core;
+
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace PowerPointLabs.PatternBrushLab.Services
@@ -13,11 +13,17 @@ namespace PowerPointLabs.PatternBrushLab.Services
         private HashSet<string> _knownShapeNames;
         private Action<PowerPoint.Shape> _onNewShapeDetected;
 
-        public bool IsActive => _isActive;
+        public bool IsActive
+        {
+            get { return _isActive; }
+        }
 
         public void Activate(Action<PowerPoint.Shape> onNewShapeDetected)
         {
-            if (_isActive) return;
+            if (_isActive)
+            {
+                return;
+            }
 
             _onNewShapeDetected = onNewShapeDetected;
             _isActive = true;
@@ -28,28 +34,44 @@ namespace PowerPointLabs.PatternBrushLab.Services
 
         public void Deactivate()
         {
-            if (!_isActive) return;
+            if (!_isActive)
+            {
+                return;
+            }
 
             _isActive = false;
             try
             {
                 Globals.ThisAddIn.Application.WindowSelectionChange -= OnSelectionChange;
             }
-            catch { }
+            catch (Exception)
+            {
+            }
+
             _onNewShapeDetected = null;
             _knownShapeNames = null;
         }
 
         private void OnSelectionChange(PowerPoint.Selection sel)
         {
-            if (!_isActive || _onNewShapeDetected == null) return;
-            if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes) return;
+            if (!_isActive || _onNewShapeDetected == null)
+            {
+                return;
+            }
+
+            if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                return;
+            }
 
             try
             {
                 PowerPoint.Shape shape = sel.ShapeRange[1];
 
-                if (_knownShapeNames.Contains(shape.Name)) return;
+                if (_knownShapeNames.Contains(shape.Name))
+                {
+                    return;
+                }
 
                 if (shape.Type == MsoShapeType.msoFreeform ||
                     shape.Type == MsoShapeType.msoLine ||
@@ -61,7 +83,9 @@ namespace PowerPointLabs.PatternBrushLab.Services
                     _knownShapeNames = SnapshotCurrentShapes();
                 }
             }
-            catch { }
+            catch (Exception)
+            {
+            }
         }
 
         private HashSet<string> SnapshotCurrentShapes()
@@ -78,7 +102,10 @@ namespace PowerPointLabs.PatternBrushLab.Services
                     }
                 }
             }
-            catch { }
+            catch (Exception)
+            {
+            }
+
             return names;
         }
     }

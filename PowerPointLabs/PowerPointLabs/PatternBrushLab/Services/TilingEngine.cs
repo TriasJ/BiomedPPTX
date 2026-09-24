@@ -92,8 +92,15 @@ namespace PowerPointLabs.PatternBrushLab.Services
         {
             float stepX = tileWidth - overlapX;
             float stepY = tileHeight - overlapY;
-            if (stepX <= 0) stepX = tileWidth * 0.5f;
-            if (stepY <= 0) stepY = tileHeight * 0.5f;
+            if (stepX <= 0)
+            {
+                stepX = tileWidth * 0.5f;
+            }
+
+            if (stepY <= 0)
+            {
+                stepY = tileHeight * 0.5f;
+            }
 
             int cols = (int)Math.Ceiling(area.Width / stepX) + 1;
             int rows = (int)Math.Ceiling(area.Height / stepY) + 1;
@@ -141,9 +148,13 @@ namespace PowerPointLabs.PatternBrushLab.Services
             {
                 int mid = (lo + hi) / 2;
                 if (arcLengths[mid] <= targetDist)
+                {
                     lo = mid;
+                }
                 else
+                {
                     hi = mid;
+                }
             }
 
             int j = lo;

@@ -27,7 +27,7 @@
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>PowerPointLabs</RootNamespace>
     <AssemblyName>PowerPointLabs</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <DefineConstants>VSTO40</DefineConstants>
@@ -208,6 +208,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.118.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.118.0\lib\net46\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="Office, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -889,7 +892,14 @@
       <DependentUpon>SmartBrowserPaneWPF.xaml</DependentUpon>
     </Compile>
     <Compile Include="SmartBrowserLab\Models\SmartDatabase.cs" />
+    <Compile Include="SmartBrowserLab\Models\IllustrationItem.cs" />
+    <Compile Include="SmartBrowserLab\Models\TilingMetadata.cs" />
+    <Compile Include="SmartBrowserLab\Models\TopicInfo.cs" />
+    <Compile Include="SmartBrowserLab\Models\TagInfo.cs" />
+    <Compile Include="SmartBrowserLab\Models\BioArtItem.cs" />
+    <Compile Include="SmartBrowserLab\Models\BioArtFileEndpoint.cs" />
     <Compile Include="SmartBrowserLab\Models\BioArtFetcher.cs" />
+    <Compile Include="SmartBrowserLab\Models\IllustrationViewModel.cs" />
     <Compile Include="SmartBrowserLab\Services\ShapeInserter.cs" />
     <Compile Include="PatternBrushLab\PatternBrushPane.cs">
       <SubType>UserControl</SubType>
@@ -900,6 +910,7 @@
     <Compile Include="PatternBrushLab\Views\PatternBrushPaneWPF.xaml.cs">
       <DependentUpon>PatternBrushPaneWPF.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PatternBrushLab\Models\PatternViewModel.cs" />
     <Compile Include="PatternBrushLab\Services\TilingEngine.cs" />
     <Compile Include="PatternBrushLab\Services\PathExtractor.cs" />
     <Compile Include="PatternBrushLab\Services\BrushModeController.cs" />

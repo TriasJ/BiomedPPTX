@@ -18,7 +18,7 @@ namespace PowerPointLabs.PatternBrushLab
         private void InitializeComponent()
         {
             this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.PatternBrushPaneWPF1 = new PowerPointLabs.PatternBrushLab.Views.PatternBrushPaneWPF();
+            this.patternBrushPaneWPF1 = new PowerPointLabs.PatternBrushLab.Views.PatternBrushPaneWPF();
             this.SuspendLayout();
 
             this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -26,7 +26,7 @@ namespace PowerPointLabs.PatternBrushLab
             this.elementHost1.Name = "elementHost1";
             this.elementHost1.Size = new System.Drawing.Size(280, 600);
             this.elementHost1.TabIndex = 0;
-            this.elementHost1.Child = this.PatternBrushPaneWPF1;
+            this.elementHost1.Child = this.patternBrushPaneWPF1;
 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -39,6 +39,6 @@ namespace PowerPointLabs.PatternBrushLab
         #endregion
 
         private System.Windows.Forms.Integration.ElementHost elementHost1;
-        private PowerPointLabs.PatternBrushLab.Views.PatternBrushPaneWPF PatternBrushPaneWPF1;
+        private PowerPointLabs.PatternBrushLab.Views.PatternBrushPaneWPF patternBrushPaneWPF1;
     }
 }

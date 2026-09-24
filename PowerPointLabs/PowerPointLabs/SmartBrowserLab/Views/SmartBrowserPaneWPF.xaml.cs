@@ -16,26 +16,6 @@ using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace PowerPointLabs.SmartBrowserLab.Views
 {
-    public class IllustrationViewModel : INotifyPropertyChanged
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string DisplayName { get; set; }
-        public string Description { get; set; }
-        public string ThumbnailPath { get; set; }
-        public string SvgPath { get; set; }
-        public string PptxFile { get; set; }
-        public int PptxSlide { get; set; }
-        public int PptxShapeIndex { get; set; }
-        public float Width { get; set; }
-        public float Height { get; set; }
-        public string Topic { get; set; }
-        public bool IsTileable { get; set; }
-        public string Source { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-    }
-
     public partial class SmartBrowserPaneWPF : UserControl
     {
         private SmartDatabase _database;
@@ -59,7 +39,10 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         public void Initialize(string dbPath, string assetsBasePath)
         {
-            if (_isInitialized) return;
+            if (_isInitialized)
+            {
+                return;
+            }
 
             try
             {
@@ -84,7 +67,10 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         private void LoadCategories()
         {
-            if (_database == null) return;
+            if (_database == null)
+            {
+                return;
+            }
 
             categoryBox.Items.Clear();
             categoryBox.Items.Add(new ComboBoxItem { Content = "All Categories", Tag = -1 });
@@ -93,7 +79,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             {
                 categoryBox.Items.Add(new ComboBoxItem
                 {
-                    Content = $"{topic.Name} ({topic.IllustrationCount})",
+                    Content = string.Format("{0} ({1})", topic.Name, topic.IllustrationCount),
                     Tag = topic.Id
                 });
             }
@@ -103,14 +89,17 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         private void LoadTagFilters()
         {
-            if (_database == null) return;
+            if (_database == null)
+            {
+                return;
+            }
 
             tagPanel.Children.Clear();
             foreach (var tag in _database.GetTags())
             {
                 var toggle = new ToggleButton
                 {
-                    Content = $"{tag.Name} ({tag.Count})",
+                    Content = string.Format("{0} ({1})", tag.Name, tag.Count),
                     Tag = tag.Name,
                     Style = FindResource("TagToggleStyle") as Style
                 };
@@ -122,7 +111,10 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         private void LoadIllustrations(string searchQuery = null, int topicId = -1)
         {
-            if (_database == null) return;
+            if (_database == null)
+            {
+                return;
+            }
 
             try
             {
@@ -189,14 +181,17 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                     foreach (var ba in bioArtResults)
                     {
                         string displayName = ba.Title;
-                        if (displayName.Length > 30) displayName = displayName.Substring(0, 27) + "...";
+                        if (displayName.Length > 30)
+                        {
+                            displayName = displayName.Substring(0, 27) + "...";
+                        }
 
                         _illustrations.Add(new IllustrationViewModel
                         {
                             Id = ba.Id + 100000,
                             Name = ba.Title,
                             DisplayName = displayName,
-                            Description = $"{ba.Description} [BioArt - {ba.License}]",
+                            Description = string.Format("{0} [BioArt - {1}]", ba.Description, ba.License),
                             ThumbnailPath = "",
                             SvgPath = "",
                             PptxFile = "",
@@ -210,7 +205,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                     }
                 }
 
-                statusText.Text = $"Showing {_illustrations.Count} illustrations";
+                statusText.Text = string.Format("Showing {0} illustrations", _illustrations.Count);
             }
             catch (Exception ex)
             {
@@ -230,7 +225,10 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
             foreach (string path in candidates)
             {
-                if (File.Exists(path)) return path;
+                if (File.Exists(path))
+                {
+                    return path;
+                }
             }
             return candidates[0];
         }
@@ -238,13 +236,19 @@ namespace PowerPointLabs.SmartBrowserLab.Views
         private void InsertSelectedShape(bool asEditable)
         {
             var selected = illustrationList.SelectedItem as IllustrationViewModel;
-            if (selected == null) return;
+            if (selected == null)
+            {
+                return;
+            }
 
             try
             {
                 var app = Globals.ThisAddIn.Application;
                 var slide = app.ActiveWindow.View.Slide as PowerPoint.Slide;
-                if (slide == null) return;
+                if (slide == null)
+                {
+                    return;
+                }
 
                 var item = new IllustrationItem
                 {
@@ -266,7 +270,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                     _shapeInserter.InsertAsPicture(item, slide, app);
                 }
 
-                statusText.Text = $"Inserted: {selected.Name}";
+                statusText.Text = "Inserted: " + selected.Name;
             }
             catch (Exception ex)
             {
@@ -292,10 +296,11 @@ namespace PowerPointLabs.SmartBrowserLab.Views
         private void SearchDebounce_Tick(object sender, EventArgs e)
         {
             _searchDebounce.Stop();
-            string query = searchBox.Text?.Trim();
+            string query = searchBox.Text != null ? searchBox.Text.Trim() : null;
 
             int topicId = -1;
-            if (categoryBox.SelectedItem is ComboBoxItem selectedCat)
+            ComboBoxItem selectedCat = categoryBox.SelectedItem as ComboBoxItem;
+            if (selectedCat != null)
             {
                 topicId = (int)selectedCat.Tag;
             }
@@ -312,15 +317,19 @@ namespace PowerPointLabs.SmartBrowserLab.Views
 
         private void CategoryBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_isInitialized) return;
-
-            int topicId = -1;
-            if (categoryBox.SelectedItem is ComboBoxItem selectedCat)
+            if (!_isInitialized)
             {
-                topicId = (int)selectedCat.Tag;
+                return;
             }
 
-            if (string.IsNullOrEmpty(searchBox?.Text))
+            int topicId = -1;
+            ComboBoxItem selectedCat2 = categoryBox.SelectedItem as ComboBoxItem;
+            if (selectedCat2 != null)
+            {
+                topicId = (int)selectedCat2.Tag;
+            }
+
+            if (string.IsNullOrEmpty(searchBox.Text))
             {
                 LoadIllustrations(topicId: topicId);
             }
@@ -331,13 +340,14 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             _activeTagFilters.Clear();
             foreach (var child in tagPanel.Children)
             {
-                if (child is ToggleButton toggle && toggle.IsChecked == true)
+                ToggleButton toggle = child as ToggleButton;
+                if (toggle != null && toggle.IsChecked == true)
                 {
                     _activeTagFilters.Add(toggle.Tag as string);
                 }
             }
 
-            if (string.IsNullOrEmpty(searchBox?.Text))
+            if (string.IsNullOrEmpty(searchBox.Text))
             {
                 LoadIllustrations();
             }
@@ -348,11 +358,11 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             if (_bioArtFetcher != null)
             {
                 statusText.Text = bioArtToggle.IsChecked == true
-                    ? $"BioArt online enabled ({_bioArtFetcher.IndexCount} items)"
+                    ? string.Format("BioArt online enabled ({0} items)", _bioArtFetcher.IndexCount)
                     : "BioArt offline";
             }
 
-            if (!string.IsNullOrEmpty(searchBox?.Text))
+            if (!string.IsNullOrEmpty(searchBox.Text))
             {
                 _searchDebounce.Stop();
                 _searchDebounce.Start();
@@ -382,10 +392,13 @@ namespace PowerPointLabs.SmartBrowserLab.Views
         private void UseAsPattern_Click(object sender, RoutedEventArgs e)
         {
             var selected = illustrationList.SelectedItem as IllustrationViewModel;
-            if (selected == null) return;
+            if (selected == null)
+            {
+                return;
+            }
 
             // TODO: Open Pattern Brush pane with this illustration pre-selected
-            statusText.Text = $"Pattern brush: {selected.Name} (coming soon)";
+            statusText.Text = "Pattern brush: " + selected.Name + " (coming soon)";
         }
 
         #endregion

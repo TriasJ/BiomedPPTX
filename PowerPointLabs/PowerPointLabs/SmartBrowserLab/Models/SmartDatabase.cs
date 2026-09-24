@@ -8,80 +8,6 @@ using Newtonsoft.Json;
 
 namespace PowerPointLabs.SmartBrowserLab.Models
 {
-    public class IllustrationItem
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string PptxFile { get; set; }
-        public int PptxSlide { get; set; }
-        public int PptxShapeIndex { get; set; }
-        public string SvgPath { get; set; }
-        public string PngPath { get; set; }
-        public float Width { get; set; }
-        public float Height { get; set; }
-        public string Topic { get; set; }
-        public string SlideTitle { get; set; }
-        public List<string> Tags { get; set; }
-        public TilingMetadata TilingMeta { get; set; }
-    }
-
-    public class TilingMetadata
-    {
-        [JsonProperty("axis")]
-        public string Axis { get; set; }
-
-        [JsonProperty("svg_width")]
-        public float SvgWidth { get; set; }
-
-        [JsonProperty("svg_height")]
-        public float SvgHeight { get; set; }
-
-        [JsonProperty("pptx_width")]
-        public float PptxWidth { get; set; }
-
-        [JsonProperty("pptx_height")]
-        public float PptxHeight { get; set; }
-
-        [JsonProperty("overlap_px")]
-        public float OverlapPx { get; set; }
-
-        [JsonProperty("overlap_pt")]
-        public float OverlapPt { get; set; }
-
-        [JsonProperty("overlap_x_px")]
-        public float OverlapXPx { get; set; }
-
-        [JsonProperty("overlap_y_px")]
-        public float OverlapYPx { get; set; }
-
-        [JsonProperty("overlap_x_pt")]
-        public float OverlapXPt { get; set; }
-
-        [JsonProperty("overlap_y_pt")]
-        public float OverlapYPt { get; set; }
-
-        [JsonProperty("offset_rows")]
-        public bool OffsetRows { get; set; }
-
-        [JsonProperty("offset_amount")]
-        public float OffsetAmount { get; set; }
-    }
-
-    public class TopicInfo
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int IllustrationCount { get; set; }
-    }
-
-    public class TagInfo
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int Count { get; set; }
-    }
-
     public class SmartDatabase : IDisposable
     {
         private SQLiteConnection _conn;
@@ -90,7 +16,7 @@ namespace PowerPointLabs.SmartBrowserLab.Models
         public SmartDatabase(string dbPath, string basePath)
         {
             _basePath = basePath;
-            _conn = new SQLiteConnection($"Data Source={dbPath};Version=3;Read Only=True;");
+            _conn = new SQLiteConnection(string.Format("Data Source={0};Version=3;Read Only=True;", dbPath));
             _conn.Open();
         }
 
@@ -270,6 +196,15 @@ namespace PowerPointLabs.SmartBrowserLab.Models
             return File.Exists(fallback) ? fallback : fullPath;
         }
 
+        public void Dispose()
+        {
+            if (_conn != null)
+            {
+                _conn.Close();
+                _conn.Dispose();
+            }
+        }
+
         private IllustrationItem ReadIllustration(SQLiteDataReader reader)
         {
             return new IllustrationItem
@@ -287,12 +222,6 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 Topic = reader.GetString(reader.GetOrdinal("topic")),
                 SlideTitle = reader.IsDBNull(reader.GetOrdinal("slide_title")) ? "" : reader.GetString(reader.GetOrdinal("slide_title"))
             };
-        }
-
-        public void Dispose()
-        {
-            _conn?.Close();
-            _conn?.Dispose();
         }
     }
 }

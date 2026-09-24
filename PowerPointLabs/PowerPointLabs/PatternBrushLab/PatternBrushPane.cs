@@ -11,7 +11,7 @@ namespace PowerPointLabs.PatternBrushLab
 
         public void InitBrush(string dbPath, string assetsBasePath)
         {
-            PatternBrushPaneWPF1.Initialize(dbPath, assetsBasePath);
+            patternBrushPaneWPF1.Initialize(dbPath, assetsBasePath);
         }
     }
 }

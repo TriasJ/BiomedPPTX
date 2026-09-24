@@ -11,7 +11,7 @@ namespace PowerPointLabs.SmartBrowserLab
 
         public void InitBrowser(string dbPath, string assetsBasePath)
         {
-            SmartBrowserPaneWPF1.Initialize(dbPath, assetsBasePath);
+            smartBrowserPaneWPF1.Initialize(dbPath, assetsBasePath);
         }
     }
 }

@@ -9,28 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace PowerPointLabs.SmartBrowserLab.Models
 {
-    public class BioArtItem
-    {
-        public int Id { get; set; }
-        public string BioArtId { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string Url { get; set; }
-        public string License { get; set; }
-        public List<string> Keywords { get; set; }
-        public List<BioArtFileEndpoint> FileEndpoints { get; set; }
-        public bool HasFiles { get; set; }
-    }
-
-    public class BioArtFileEndpoint
-    {
-        [JsonProperty("file_id")]
-        public string FileId { get; set; }
-
-        [JsonProperty("url")]
-        public string FileUrl { get; set; }
-    }
-
     public class BioArtFetcher
     {
         private readonly string _indexPath;
@@ -50,7 +28,10 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 
         public void LoadIndex()
         {
-            if (_index != null) return;
+            if (_index != null)
+            {
+                return;
+            }
 
             if (!File.Exists(_indexPath))
             {
@@ -73,8 +54,8 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     Url = kvp.Value.Value<string>("url") ?? "",
                     License = kvp.Value.Value<string>("license") ?? "Unknown",
                     HasFiles = kvp.Value.Value<bool>("has_files"),
-                    Keywords = kvp.Value["keywords"]?.ToObject<List<string>>() ?? new List<string>(),
-                    FileEndpoints = kvp.Value["file_endpoints"]?.ToObject<List<BioArtFileEndpoint>>() ?? new List<BioArtFileEndpoint>()
+                    Keywords = kvp.Value["keywords"] != null ? kvp.Value["keywords"].ToObject<List<string>>() : new List<string>(),
+                    FileEndpoints = kvp.Value["file_endpoints"] != null ? kvp.Value["file_endpoints"].ToObject<List<BioArtFileEndpoint>>() : new List<BioArtFileEndpoint>()
                 };
                 _index[kvp.Key] = item;
             }
@@ -100,13 +81,31 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 
                 foreach (string term in terms)
                 {
-                    if (item.BioArtId.ToLower().Contains(term)) score += 100;
-                    if (titleLower.Contains(term)) score += 10;
-                    if (descLower.Contains(term)) score += 7;
-                    if (item.Keywords.Any(k => k.ToLower() == term)) score += 5;
+                    if (item.BioArtId.ToLower().Contains(term))
+                    {
+                        score += 100;
+                    }
+
+                    if (titleLower.Contains(term))
+                    {
+                        score += 10;
+                    }
+
+                    if (descLower.Contains(term))
+                    {
+                        score += 7;
+                    }
+
+                    if (item.Keywords.Any(k => k.ToLower() == term))
+                    {
+                        score += 5;
+                    }
                 }
 
-                if (item.HasFiles) score += 1;
+                if (item.HasFiles)
+                {
+                    score += 1;
+                }
 
                 if (score > 0)
                 {
@@ -131,8 +130,11 @@ namespace PowerPointLabs.SmartBrowserLab.Models
             string[] cachedExts = { "svg", "png", "jpg" };
             foreach (string ext in cachedExts)
             {
-                string cached = Path.Combine(_cachePath, $"bioart_{item.Id}.{ext}");
-                if (File.Exists(cached)) return cached;
+                string cached = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
+                if (File.Exists(cached))
+                {
+                    return cached;
+                }
             }
 
             string[] preferOrder = preferredFormat == "svg"
@@ -153,7 +155,7 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 
                             if (ext == targetExt)
                             {
-                                string filePath = Path.Combine(_cachePath, $"bioart_{item.Id}.{ext}");
+                                string filePath = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
                                 File.WriteAllBytes(filePath, data);
                                 return filePath;
                             }
@@ -177,7 +179,7 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                         string ext = DetectFileType(data);
                         if (ext == "png" || ext == "jpg" || ext == "svg")
                         {
-                            string filePath = Path.Combine(_cachePath, $"bioart_{item.Id}.{ext}");
+                            string filePath = Path.Combine(_cachePath, string.Format("bioart_{0}.{1}", item.Id, ext));
                             File.WriteAllBytes(filePath, data);
                             return filePath;
                         }
@@ -203,20 +205,34 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 
         private string DetectFileType(byte[] data)
         {
-            if (data.Length < 4) return "bin";
+            if (data.Length < 4)
+            {
+                return "bin";
+            }
 
             if (data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47)
+            {
                 return "png";
+            }
+
             if (data[0] == 0xFF && data[1] == 0xD8)
+            {
                 return "jpg";
-            if (data[0] == 0x3C) // '<' — likely SVG or XML
+            }
+
+            if (data[0] == 0x3C)
             {
                 string header = System.Text.Encoding.UTF8.GetString(data, 0, Math.Min(100, data.Length));
                 if (header.Contains("<svg") || header.Contains("<?xml"))
+                {
                     return "svg";
+                }
             }
+
             if (data[0] == 0x25 && data[1] == 0x50 && data[2] == 0x44 && data[3] == 0x46)
+            {
                 return "pdf";
+            }
 
             return "png";
         }

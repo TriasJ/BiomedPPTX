@@ -94,13 +94,29 @@ namespace PowerPointLabs.SmartBrowserLab.Services
             return InsertAsEditableShape(item, targetSlide, app);
         }
 
-        private PowerPoint.Presentation GetOrOpenPresentation(string pptxPath, PowerPoint.Application app)
+        public void CloseAllCached()
         {
-            if (_presentationCache.TryGetValue(pptxPath, out PowerPoint.Presentation cached))
+            foreach (var pres in _presentationCache.Values)
             {
                 try
                 {
-                    var _ = cached.Slides.Count;
+                    pres.Close();
+                }
+                catch (Exception)
+                {
+                }
+            }
+            _presentationCache.Clear();
+        }
+
+        private PowerPoint.Presentation GetOrOpenPresentation(string pptxPath, PowerPoint.Application app)
+        {
+            PowerPoint.Presentation cached;
+            if (_presentationCache.TryGetValue(pptxPath, out cached))
+            {
+                try
+                {
+                    int count = cached.Slides.Count;
                     return cached;
                 }
                 catch
@@ -131,20 +147,8 @@ namespace PowerPointLabs.SmartBrowserLab.Services
             {
                 return "";
             }
-            return Path.Combine(_smartLibBasePath, relativePath);
-        }
 
-        public void CloseAllCached()
-        {
-            foreach (var pres in _presentationCache.Values)
-            {
-                try
-                {
-                    pres.Close();
-                }
-                catch { }
-            }
-            _presentationCache.Clear();
+            return Path.Combine(_smartLibBasePath, relativePath);
         }
     }
 }
