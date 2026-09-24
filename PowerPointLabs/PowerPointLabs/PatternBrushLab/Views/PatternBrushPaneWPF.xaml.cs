@@ -114,8 +114,6 @@ namespace PowerPointLabs.PatternBrushLab.Views
                         overlapX, overlapY,
                         _selectedPattern.OffsetRows,
                         offsetPt);
-
-                    shape.Delete();
                 }
                 else
                 {
@@ -155,20 +153,38 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
                 for (int i = 1; i < placements.Count; i++)
                 {
-                    PowerPoint.Shape dup = firstTile.Duplicate()[1];
-                    dup.Left = placements[i].Position.X - _selectedPattern.TileWidth / 2;
-                    dup.Top = placements[i].Position.Y - _selectedPattern.TileHeight / 2;
-                    dup.Rotation = placements[i].RotationDegrees;
-                    tileNames.Add(dup.Name);
+                    try
+                    {
+                        PowerPoint.Shape dup = firstTile.Duplicate()[1];
+                        dup.Left = placements[i].Position.X - _selectedPattern.TileWidth / 2;
+                        dup.Top = placements[i].Position.Y - _selectedPattern.TileHeight / 2;
+                        dup.Rotation = placements[i].RotationDegrees;
+                        tileNames.Add(dup.Name);
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
 
                 if (tileNames.Count > 1)
                 {
-                    var group = slide.Shapes.Range(tileNames.ToArray()).Group();
-                    group.Name = "PatternBrush_" + _selectedPattern.Name;
+                    try
+                    {
+                        var group = slide.Shapes.Range(tileNames.ToArray()).Group();
+                        group.Name = "PatternBrush_" + _selectedPattern.Name;
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
 
-                shape.Delete();
+                try
+                {
+                    shape.Delete();
+                }
+                catch (Exception)
+                {
+                }
                 selectedPatternText.Text = string.Format("Applied {0} tiles", placements.Count);
             }
             catch (Exception ex)
