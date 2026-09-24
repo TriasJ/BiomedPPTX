@@ -36,10 +36,13 @@ namespace PowerPointLabs.Models
             PowerPoint.Shape indicatorShape = AddPowerPointLabsIndicator();
             ManageNonMatchingShapes(shapeToZoom, indicatorShape);
             DefaultMotionAnimation.AddDefaultMotionAnimation(this, shapeToZoom, referenceShape, 0.5f, PowerPoint.MsoAnimTriggerType.msoAnimTriggerWithPrevious);
-            
+
             DefaultMotionAnimation.PreloadShape(this, shapeToZoom, false);
             DefaultMotionAnimation.DuplicateAsCoverImage(this, backgroundShape);
-            indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            if (indicatorShape != null)
+            {
+                indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            }
         }
 
         public void AddDrillDownAnimationBackground(PowerPoint.Shape backgroundShape, PowerPoint.Shape shapeToZoom, PowerPoint.Shape referenceShape)
@@ -50,7 +53,10 @@ namespace PowerPointLabs.Models
 
             DefaultMotionAnimation.PreloadShape(this, shapeToZoom, false);
             DefaultMotionAnimation.DuplicateAsCoverImage(this, backgroundShape);
-            indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            if (indicatorShape != null)
+            {
+                indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            }
         }
 
         private void ManageSlideTransitions()

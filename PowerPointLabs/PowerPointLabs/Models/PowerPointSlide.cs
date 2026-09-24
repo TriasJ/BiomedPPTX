@@ -1249,19 +1249,7 @@ namespace PowerPointLabs.Models
 
         protected Shape AddPowerPointLabsIndicator()
         {
-            String tempFileName = Path.GetTempFileName();
-            Properties.Resources.Indicator.Save(tempFileName);
-            Shape indicatorShape = _slide.Shapes.AddPicture(tempFileName, Office.MsoTriState.msoFalse, Office.MsoTriState.msoTrue, PowerPointPresentation.Current.SlideWidth - 120, 0, 120, 84);
-
-            indicatorShape.Left = PowerPointPresentation.Current.SlideWidth - 120;
-            indicatorShape.Top = 0;
-            indicatorShape.Width = 120;
-            indicatorShape.Height = 84;
-            indicatorShape.Name = PptLabsIndicatorShapeName + DateTime.Now.ToString("yyyyMMddHHmmssffff");
-
-            ShapeUtil.MakeShapeViewTimeInvisible(indicatorShape, _slide);
-
-            return indicatorShape;
+            return null;
         }
 
         protected void DeleteSlideNotes()

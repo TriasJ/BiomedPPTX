@@ -35,9 +35,13 @@ namespace PowerPointLabs.Models
         public void AddAutoAnimation(PowerPoint.Shape[] currentSlideShapes, PowerPoint.Shape[] nextSlideSlideShapes, int[] matchingShapeIDs)
         {
             PowerPoint.Shape indicatorShape = AddPowerPointLabsIndicator();
-            ManageNonMatchingShapes(matchingShapeIDs, indicatorShape.Id);
+            int indicatorId = indicatorShape != null ? indicatorShape.Id : -1;
+            ManageNonMatchingShapes(matchingShapeIDs, indicatorId);
             AnimateMatchingShapes(currentSlideShapes, nextSlideSlideShapes, matchingShapeIDs);
-            indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            if (indicatorShape != null)
+            {
+                indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            }
         }
 
         private void AnimateMatchingShapes(PowerPoint.Shape[] currentSlideShapes, PowerPoint.Shape[] nextSlideSlideShapes, int[] matchingShapeIDs)

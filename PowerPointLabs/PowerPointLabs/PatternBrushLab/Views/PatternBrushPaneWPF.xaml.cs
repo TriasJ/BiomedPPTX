@@ -271,6 +271,20 @@ namespace PowerPointLabs.PatternBrushLab.Views
             if (autoConvertToggle.IsChecked == true && _selectedPattern != null)
             {
                 _brushController.Activate(OnNewShapeDrawn);
+                try
+                {
+                    Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeScribble");
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeFreeform");
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
             }
             else
             {

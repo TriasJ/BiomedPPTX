@@ -39,14 +39,20 @@ namespace PowerPointLabs.Models
             
             DefaultMotionAnimation.PreloadShape(this, backgroundShape, false);
             DefaultMotionAnimation.DuplicateAsCoverImage(this, shapeToZoom);
-            indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            if (indicatorShape != null)
+            {
+                indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            }
         }
 
         public void AddStepBackAnimationNonBackground(PowerPoint.Shape shapeToZoom, PowerPoint.Shape referenceShape)
         {
             PowerPoint.Shape indicatorShape = AddPowerPointLabsIndicator();
             DefaultMotionAnimation.AddStepBackMotionAnimation(this, shapeToZoom, referenceShape, 0.5f, PowerPoint.MsoAnimTriggerType.msoAnimTriggerWithPrevious);
-            indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            if (indicatorShape != null)
+            {
+                indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+            }
         }
 
         private void ManageSlideTransitions()

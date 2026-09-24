@@ -178,6 +178,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                 if (bioArtToggle.IsChecked == true && !string.IsNullOrWhiteSpace(searchQuery) && _bioArtFetcher != null)
                 {
                     var bioArtResults = _bioArtFetcher.Search(searchQuery, 30);
+                    string bioArtCache = Path.Combine(ThisAddIn.AppDataFolder, "BioArtCache");
                     foreach (var ba in bioArtResults)
                     {
                         string displayName = ba.Title;
@@ -187,16 +188,15 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                         }
 
                         string bioArtThumb = "";
-                        try
+                        string[] exts = { "svg", "png", "jpg" };
+                        foreach (string ext in exts)
                         {
-                            string downloaded = _bioArtFetcher.DownloadImage(ba);
-                            if (downloaded != null && File.Exists(downloaded))
+                            string cached = Path.Combine(bioArtCache, string.Format("bioart_{0}.{1}", ba.Id, ext));
+                            if (File.Exists(cached))
                             {
-                                bioArtThumb = downloaded;
+                                bioArtThumb = cached;
+                                break;
                             }
-                        }
-                        catch (Exception)
-                        {
                         }
 
                         _illustrations.Add(new IllustrationViewModel
@@ -206,7 +206,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                             DisplayName = string.Format("[BioArt] {0}", displayName),
                             Description = string.Format("{0} [BioArt - {1}]", ba.Description, ba.License),
                             ThumbnailPath = bioArtThumb,
-                            SvgPath = bioArtThumb,
+                            SvgPath = "",
                             PptxFile = "",
                             PptxSlide = 0,
                             PptxShapeIndex = 0,
@@ -263,17 +263,40 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                     return;
                 }
 
-                if (selected.Source == "BioArt" && !string.IsNullOrEmpty(selected.ThumbnailPath) && File.Exists(selected.ThumbnailPath))
+                if (selected.Source == "BioArt")
                 {
-                    PowerPoint.Shape bioShape = slide.Shapes.AddPicture(
-                        selected.ThumbnailPath,
-                        Microsoft.Office.Core.MsoTriState.msoFalse,
-                        Microsoft.Office.Core.MsoTriState.msoTrue,
-                        0, 0);
-                    float sw = slide.CustomLayout.Width;
-                    float sh = slide.CustomLayout.Height;
-                    bioShape.Left = (sw - bioShape.Width) / 2;
-                    bioShape.Top = (sh - bioShape.Height) / 2;
+                    string imagePath = selected.ThumbnailPath;
+                    if (string.IsNullOrEmpty(imagePath) || !File.Exists(imagePath))
+                    {
+                        statusText.Text = "Downloading BioArt image...";
+                        if (_bioArtFetcher != null)
+                        {
+                            int bioArtId = selected.Id - 100000;
+                            var bioArtResults = _bioArtFetcher.Search(selected.Name, 1);
+                            if (bioArtResults.Count > 0)
+                            {
+                                imagePath = _bioArtFetcher.DownloadImage(bioArtResults[0]);
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                    {
+                        PowerPoint.Shape bioShape = slide.Shapes.AddPicture(
+                            imagePath,
+                            Microsoft.Office.Core.MsoTriState.msoFalse,
+                            Microsoft.Office.Core.MsoTriState.msoTrue,
+                            0, 0);
+                        float sw = slide.CustomLayout.Width;
+                        float sh = slide.CustomLayout.Height;
+                        bioShape.Left = (sw - bioShape.Width) / 2;
+                        bioShape.Top = (sh - bioShape.Height) / 2;
+                        statusText.Text = string.Format("Inserted BioArt: {0}", selected.Name);
+                    }
+                    else
+                    {
+                        statusText.Text = "Failed to download BioArt image";
+                    }
                 }
                 else
                 {

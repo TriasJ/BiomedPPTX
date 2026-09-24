@@ -95,7 +95,10 @@ namespace PowerPointLabs.Models
                 PowerPoint.Shape spotlightPicture = ConvertToSpotlightPicture(spotlightShapes);
                 FormatSpotlightPicture(spotlightPicture);
                 RenderSpotlightPicture(spotlightPicture);
-                indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+                if (indicatorShape != null)
+                {
+                    indicatorShape.ZOrder(Office.MsoZOrderCmd.msoBringToFront);
+                }
             }
             catch (Exception e)
             {

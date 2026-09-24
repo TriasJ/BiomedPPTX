@@ -23,7 +23,11 @@ namespace PowerPointLabs.Models
         # region Constructor
         private PowerPointBgEffectSlide(Slide slide) : base(slide)
         {
-            AddPowerPointLabsIndicator().ZOrder(Core.MsoZOrderCmd.msoBringToFront);
+            Shape indicator = AddPowerPointLabsIndicator();
+            if (indicator != null)
+            {
+                indicator.ZOrder(Core.MsoZOrderCmd.msoBringToFront);
+            }
         }
 
         public static PowerPointBgEffectSlide BgEffectFactory(Slide refSlide, bool coverShape = true)
