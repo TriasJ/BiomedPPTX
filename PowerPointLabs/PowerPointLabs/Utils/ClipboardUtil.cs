@@ -18,6 +18,11 @@ namespace PowerPointLabs.Utils
 
         public static bool IsClipboardEmpty()
         {
+            if (PPLClipboard.Instance == null)
+            {
+                return true;
+            }
+
             return PPLClipboard.Instance.IsEmpty();
         }
 
@@ -98,6 +103,11 @@ namespace PowerPointLabs.Utils
 
         private static void SaveClipboard(PowerPointPresentation pres, PowerPointSlide origSlide, out PowerPointSlide tempClipboardSlide, out ShapeRange tempClipboardShapes, out SlideRange tempPastedSlide)
         {
+            if (PPLClipboard.Instance == null)
+            {
+                PPLClipboard.Init(new IntPtr(Globals.ThisAddIn.Application.HWND));
+            }
+
             Logger.Log("RestoreClipboardAfterAction: Trying to paste as slide.", ActionFramework.Common.Logger.LogType.Info);
             ClipboardUtilData data = PPLClipboard.Instance.LockAndRelease(() => SaveClipboardUnsafe(pres, origSlide));
             tempClipboardSlide = data.tempClipboardSlide;
