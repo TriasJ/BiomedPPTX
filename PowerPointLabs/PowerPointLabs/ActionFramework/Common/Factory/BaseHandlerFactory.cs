@@ -20,10 +20,47 @@ namespace PowerPointLabs.ActionFramework.Common.Factory
 
         protected BaseHandlerFactory()
         {
-            AggregateCatalog catalog = new AggregateCatalog(
-                new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-            CompositionContainer container = new CompositionContainer(catalog);
-            container.ComposeParts(this);
+            try
+            {
+                AggregateCatalog catalog = new AggregateCatalog(
+                    new AssemblyCatalog(Assembly.GetExecutingAssembly()));
+                CompositionContainer container = new CompositionContainer(catalog);
+                container.ComposeParts(this);
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                string loaderMessages = "";
+                if (ex.LoaderExceptions != null)
+                {
+                    foreach (Exception le in ex.LoaderExceptions)
+                    {
+                        if (le != null)
+                        {
+                            loaderMessages += le.Message + "\n";
+                        }
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("MEF ReflectionTypeLoadException: " + loaderMessages);
+                System.IO.File.WriteAllText(
+                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "BiomedPPTX_MEF_Error.txt"),
+                    "ReflectionTypeLoadException:\n" + loaderMessages + "\n\nStackTrace:\n" + ex.StackTrace);
+
+                AggregateCatalog safeCatalog = new AggregateCatalog();
+                foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
+                {
+                    try
+                    {
+                        safeCatalog.Catalogs.Add(new TypeCatalog(type));
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                CompositionContainer container = new CompositionContainer(safeCatalog);
+                container.ComposeParts(this);
+            }
         }
 
         public THandler CreateInstance(string ribbonId, string ribbonTag)
@@ -36,9 +73,22 @@ namespace PowerPointLabs.ActionFramework.Common.Factory
                     return handler.Value;
                 }
             }
+
             return GetEmptyHandler();
         }
 
         protected abstract THandler GetEmptyHandler();
+
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null);
+            }
+        }
     }
 }
