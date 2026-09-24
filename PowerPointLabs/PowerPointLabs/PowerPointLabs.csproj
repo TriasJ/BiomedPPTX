@@ -172,11 +172,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestKeyFile>BiomedPPTX.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>B200334E7EFE8551DB3F9CF5B7674D388B3D4A53</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>435088C5D719D5AD177DFBDD6F0306B3244E3E26</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!--
     This section specifies references for the project.
