@@ -77,27 +77,43 @@ namespace PowerPointLabs.Utils
         public static TResult RestoreClipboardAfterAction<TResult>(System.Func<TResult> action, PowerPointPresentation pres, PowerPointSlide origSlide)
         {
             TResult result;
-            if (!IsClipboardEmpty())
+            PowerPointSlide tempClipboardSlide = null;
+            ShapeRange tempClipboardShapes = null;
+            SlideRange tempPastedSlide = null;
+            bool clipboardSaved = false;
+
+            try
             {
-                // Save clipboard onto a temp slide
-                PowerPointSlide tempClipboardSlide;
-                ShapeRange tempClipboardShapes;
-                SlideRange tempPastedSlide;
-                SaveClipboard(pres, origSlide, out tempClipboardSlide, out tempClipboardShapes, out tempPastedSlide);
-
-                result = action();
-
-                RestoreClipboard(tempClipboardShapes, tempPastedSlide);
-                if (tempClipboardSlide != null)
+                if (!IsClipboardEmpty())
                 {
-                    tempClipboardSlide.Delete();
+                    SaveClipboard(pres, origSlide, out tempClipboardSlide, out tempClipboardShapes, out tempPastedSlide);
+                    clipboardSaved = true;
                 }
             }
-            else
+            catch (Exception e)
             {
-                // Clipboard is empty, we can just run the action function
-                result = action();
+                Logger.LogException(e, "RestoreClipboardAfterAction: clipboard save failed, continuing without");
+                clipboardSaved = false;
             }
+
+            result = action();
+
+            if (clipboardSaved)
+            {
+                try
+                {
+                    RestoreClipboard(tempClipboardShapes, tempPastedSlide);
+                    if (tempClipboardSlide != null)
+                    {
+                        tempClipboardSlide.Delete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogException(e, "RestoreClipboardAfterAction: clipboard restore failed");
+                }
+            }
+
             return result;
         }
 
@@ -110,9 +126,18 @@ namespace PowerPointLabs.Utils
 
             Logger.Log("RestoreClipboardAfterAction: Trying to paste as slide.", ActionFramework.Common.Logger.LogType.Info);
             ClipboardUtilData data = PPLClipboard.Instance.LockAndRelease(() => SaveClipboardUnsafe(pres, origSlide));
-            tempClipboardSlide = data.tempClipboardSlide;
-            tempClipboardShapes = data.tempClipboardShapes;
-            tempPastedSlide = data.tempPastedSlide;
+            if (data != null)
+            {
+                tempClipboardSlide = data.tempClipboardSlide;
+                tempClipboardShapes = data.tempClipboardShapes;
+                tempPastedSlide = data.tempPastedSlide;
+            }
+            else
+            {
+                tempClipboardSlide = null;
+                tempClipboardShapes = null;
+                tempPastedSlide = null;
+            }
         }
 
         private static ClipboardUtilData SaveClipboardUnsafe(PowerPointPresentation pres, PowerPointSlide origSlide)

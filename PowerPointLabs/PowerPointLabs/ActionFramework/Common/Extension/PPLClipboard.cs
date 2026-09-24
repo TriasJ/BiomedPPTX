@@ -87,8 +87,7 @@ namespace PowerPointLabs.ActionFramework.Common.Extension
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("PPLClipboard.LockAndRelease error: " + e.Message);
-                return default(TResult);
+                throw e;
             }
             finally
             {
