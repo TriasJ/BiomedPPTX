@@ -504,7 +504,50 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             }
 
             PatternBrushLab.Views.PatternBrushPaneWPF.PendingCustomPattern = selected;
-            statusText.Text = "Open Pattern Brush to tile: " + selected.Name;
+
+            try
+            {
+                Microsoft.Office.Tools.CustomTaskPane brushPane = Globals.ThisAddIn.GetActivePane(typeof(PatternBrushLab.PatternBrushPane));
+                if (brushPane != null)
+                {
+                    brushPane.Visible = true;
+                    PatternBrushLab.PatternBrushPane pane = brushPane.Control as PatternBrushLab.PatternBrushPane;
+                    if (pane != null)
+                    {
+                        string assetsPath = FindSmartLibraryPath();
+                        string dbPath = Path.Combine(assetsPath, "illustrations.db");
+                        if (File.Exists(dbPath))
+                        {
+                            pane.InitBrush(dbPath, assetsPath);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            statusText.Text = "Sent to Pattern Brush: " + selected.Name;
+        }
+
+        private string FindSmartLibraryPath()
+        {
+            string[] searchPaths = new[]
+            {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "SMART-Library"),
+                Path.Combine(ThisAddIn.AppDataFolder, "Assets", "SMART-Library"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "__Scratch", "SMART-Library")
+            };
+
+            foreach (string path in searchPaths)
+            {
+                if (File.Exists(Path.Combine(path, "illustrations.db")))
+                {
+                    return path;
+                }
+            }
+
+            return searchPaths[0];
         }
 
         #endregion
