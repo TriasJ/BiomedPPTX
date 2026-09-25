@@ -299,19 +299,45 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         private void DrawButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            bool activated = false;
+
+            string[] msoCommands = new[]
             {
-                Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeScribble");
-            }
-            catch (Exception)
+                "ShapeScribble", "ShapeFreeform", "ShapeCurve",
+                "Scribble", "Freeform", "ObjectsScribble"
+            };
+
+            foreach (string cmd in msoCommands)
             {
                 try
                 {
-                    Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ShapeFreeform");
+                    Globals.ThisAddIn.Application.CommandBars.ExecuteMso(cmd);
+                    activated = true;
+                    break;
                 }
                 catch (Exception)
                 {
                 }
+            }
+
+            if (!activated)
+            {
+                try
+                {
+                    Globals.ThisAddIn.Application.ActiveWindow.Activate();
+                    System.Windows.Forms.SendKeys.Send("%n");
+                    System.Threading.Thread.Sleep(300);
+                    System.Windows.Forms.SendKeys.Send("sh");
+                    activated = true;
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            if (!activated)
+            {
+                selectedPatternText.Text = "Use Insert > Shapes > Freeform, then Apply";
             }
         }
 
