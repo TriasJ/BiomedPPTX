@@ -87,7 +87,7 @@
                 <TextBlock Grid.Column="0" Text="Offset X:" FontSize="11" VerticalAlignment="Center"
                            Foreground="#666666"
                            ToolTip="Horizontal overlap between tiles (points)"/>
-                <Slider x:Name="offsetXSlider" Grid.Column="1" Minimum="0" Maximum="50" Value="10"
+                <Slider x:Name="offsetXSlider" Grid.Column="1" Minimum="-50" Maximum="100" Value="10"
                         Margin="6,0,6,0" VerticalAlignment="Center"
                         ValueChanged="OffsetXSlider_ValueChanged"
                         TickFrequency="1" IsSnapToTickEnabled="True"/>
@@ -103,7 +103,7 @@
                 <TextBlock Grid.Column="0" Text="Offset Y:" FontSize="11" VerticalAlignment="Center"
                            Foreground="#666666"
                            ToolTip="Vertical overlap between tiles (points, 2D patterns only)"/>
-                <Slider x:Name="offsetYSlider" Grid.Column="1" Minimum="0" Maximum="50" Value="10"
+                <Slider x:Name="offsetYSlider" Grid.Column="1" Minimum="-50" Maximum="100" Value="10"
                         Margin="6,0,6,0" VerticalAlignment="Center"
                         ValueChanged="OffsetYSlider_ValueChanged"
                         TickFrequency="1" IsSnapToTickEnabled="True"/>

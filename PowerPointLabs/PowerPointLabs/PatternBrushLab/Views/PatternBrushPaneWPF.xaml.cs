@@ -299,45 +299,34 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         private void DrawButton_Click(object sender, RoutedEventArgs e)
         {
-            bool activated = false;
-
-            string[] msoCommands = new[]
+            try
             {
-                "ShapeScribble", "ShapeFreeform", "ShapeCurve",
-                "Scribble", "Freeform", "ObjectsScribble"
-            };
+                var app = Globals.ThisAddIn.Application;
+                PowerPoint.Slide slide = app.ActiveWindow.View.Slide as PowerPoint.Slide;
+                if (slide == null)
+                {
+                    return;
+                }
 
-            foreach (string cmd in msoCommands)
-            {
-                try
-                {
-                    Globals.ThisAddIn.Application.CommandBars.ExecuteMso(cmd);
-                    activated = true;
-                    break;
-                }
-                catch (Exception)
-                {
-                }
+                float sw = app.ActivePresentation.PageSetup.SlideWidth;
+                float sh = app.ActivePresentation.PageSetup.SlideHeight;
+                float margin = 80;
+
+                PowerPoint.Shape line = slide.Shapes.AddLine(
+                    margin, sh / 2,
+                    sw - margin, sh / 2);
+
+                line.Line.Weight = 2;
+                line.Line.ForeColor.RGB = 0xCCCCCC;
+                line.Line.DashStyle = MsoLineDashStyle.msoLineDash;
+                line.Name = "PatternBrush_Guide";
+                line.Select();
+
+                selectedPatternText.Text = "Adjust the line, then Apply. Right-click > Edit Points for curves.";
             }
-
-            if (!activated)
+            catch (Exception ex)
             {
-                try
-                {
-                    Globals.ThisAddIn.Application.ActiveWindow.Activate();
-                    System.Windows.Forms.SendKeys.Send("%n");
-                    System.Threading.Thread.Sleep(300);
-                    System.Windows.Forms.SendKeys.Send("sh");
-                    activated = true;
-                }
-                catch (Exception)
-                {
-                }
-            }
-
-            if (!activated)
-            {
-                selectedPatternText.Text = "Use Insert > Shapes > Freeform, then Apply";
+                selectedPatternText.Text = "Error: " + ex.Message;
             }
         }
 
