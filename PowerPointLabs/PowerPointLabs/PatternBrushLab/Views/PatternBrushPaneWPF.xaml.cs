@@ -208,11 +208,13 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 catch (Exception)
                 {
                 }
-                selectedPatternText.Text = string.Format("Applied {0} tiles", placements.Count);
+                selectedPatternText.Text = string.Format("Applied {0} tiles. Select another shape to apply again.", placements.Count);
+                applyButton.IsEnabled = true;
             }
             catch (Exception ex)
             {
                 selectedPatternText.Text = "Error: " + ex.Message;
+                applyButton.IsEnabled = true;
             }
         }
 

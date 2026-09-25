@@ -128,23 +128,213 @@ namespace PowerPointLabs.PatternBrushLab.Services
 
         private List<PointF> GenerateOutlinePath(PowerPoint.Shape shape)
         {
-            float cx = shape.Left + shape.Width / 2;
-            float cy = shape.Top + shape.Height / 2;
-            float rx = shape.Width / 2;
-            float ry = shape.Height / 2;
+            float left = shape.Left;
+            float top = shape.Top;
+            float w = shape.Width;
+            float h = shape.Height;
+            float cx = left + w / 2;
+            float cy = top + h / 2;
 
+            try
+            {
+                MsoAutoShapeType shapeType = shape.AutoShapeType;
+
+                if (shapeType == MsoAutoShapeType.msoShapeIsoscelesTriangle)
+                {
+                    return InterpolatePolygon(new List<PointF>
+                    {
+                        new PointF(cx, top),
+                        new PointF(left + w, top + h),
+                        new PointF(left, top + h),
+                        new PointF(cx, top)
+                    }, 10);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapeRightTriangle)
+                {
+                    return InterpolatePolygon(new List<PointF>
+                    {
+                        new PointF(left, top),
+                        new PointF(left, top + h),
+                        new PointF(left + w, top + h),
+                        new PointF(left, top)
+                    }, 10);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapeRectangle ||
+                    shapeType == MsoAutoShapeType.msoShapeRoundedRectangle)
+                {
+                    return InterpolatePolygon(new List<PointF>
+                    {
+                        new PointF(left, top),
+                        new PointF(left + w, top),
+                        new PointF(left + w, top + h),
+                        new PointF(left, top + h),
+                        new PointF(left, top)
+                    }, 10);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapeDiamond)
+                {
+                    return InterpolatePolygon(new List<PointF>
+                    {
+                        new PointF(cx, top),
+                        new PointF(left + w, cy),
+                        new PointF(cx, top + h),
+                        new PointF(left, cy),
+                        new PointF(cx, top)
+                    }, 10);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapePentagon ||
+                    shapeType == MsoAutoShapeType.msoShapeRegularPentagon)
+                {
+                    return GenerateRegularPolygon(cx, cy, w / 2, h / 2, 5, -Math.PI / 2);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapeHexagon)
+                {
+                    return GenerateRegularPolygon(cx, cy, w / 2, h / 2, 6, 0);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapeOctagon)
+                {
+                    return GenerateRegularPolygon(cx, cy, w / 2, h / 2, 8, Math.PI / 8);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape4pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 4);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape5pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 5);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape6pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 6);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape8pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 8);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape10pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 10);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape12pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 12);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape16pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 16);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape24pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 24);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShape32pointStar)
+                {
+                    return GenerateStarPath(cx, cy, w / 2, h / 2, 32);
+                }
+
+                if (shapeType == MsoAutoShapeType.msoShapeCross)
+                {
+                    float arm = w / 3;
+                    return InterpolatePolygon(new List<PointF>
+                    {
+                        new PointF(left + arm, top),
+                        new PointF(left + 2 * arm, top),
+                        new PointF(left + 2 * arm, top + arm),
+                        new PointF(left + w, top + arm),
+                        new PointF(left + w, top + 2 * arm),
+                        new PointF(left + 2 * arm, top + 2 * arm),
+                        new PointF(left + 2 * arm, top + h),
+                        new PointF(left + arm, top + h),
+                        new PointF(left + arm, top + 2 * arm),
+                        new PointF(left, top + 2 * arm),
+                        new PointF(left, top + arm),
+                        new PointF(left + arm, top + arm),
+                        new PointF(left + arm, top)
+                    }, 5);
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            return GenerateEllipsePath(cx, cy, w / 2, h / 2);
+        }
+
+        private List<PointF> GenerateEllipsePath(float cx, float cy, float rx, float ry)
+        {
             var points = new List<PointF>();
             int segments = 72;
-
             for (int i = 0; i <= segments; i++)
             {
                 double angle = 2.0 * Math.PI * i / segments;
-                float x = cx + rx * (float)Math.Cos(angle);
-                float y = cy + ry * (float)Math.Sin(angle);
-                points.Add(new PointF(x, y));
+                points.Add(new PointF(cx + rx * (float)Math.Cos(angle), cy + ry * (float)Math.Sin(angle)));
             }
 
             return points;
+        }
+
+        private List<PointF> GenerateRegularPolygon(float cx, float cy, float rx, float ry, int sides, double startAngle)
+        {
+            var vertices = new List<PointF>();
+            for (int i = 0; i <= sides; i++)
+            {
+                double angle = startAngle + 2.0 * Math.PI * i / sides;
+                vertices.Add(new PointF(cx + rx * (float)Math.Cos(angle), cy + ry * (float)Math.Sin(angle)));
+            }
+
+            return InterpolatePolygon(vertices, 10);
+        }
+
+        private List<PointF> GenerateStarPath(float cx, float cy, float rx, float ry, int numPoints)
+        {
+            var vertices = new List<PointF>();
+            float innerRx = rx * 0.4f;
+            float innerRy = ry * 0.4f;
+            double startAngle = -Math.PI / 2;
+
+            for (int i = 0; i <= numPoints * 2; i++)
+            {
+                double angle = startAngle + Math.PI * i / numPoints;
+                bool isOuter = (i % 2 == 0);
+                float rX = isOuter ? rx : innerRx;
+                float rY = isOuter ? ry : innerRy;
+                vertices.Add(new PointF(cx + rX * (float)Math.Cos(angle), cy + rY * (float)Math.Sin(angle)));
+            }
+
+            return InterpolatePolygon(vertices, 5);
+        }
+
+        private List<PointF> InterpolatePolygon(List<PointF> vertices, int pointsPerEdge)
+        {
+            var result = new List<PointF>();
+            for (int i = 0; i < vertices.Count - 1; i++)
+            {
+                for (int j = 0; j < pointsPerEdge; j++)
+                {
+                    float t = (float)j / pointsPerEdge;
+                    float x = vertices[i].X + t * (vertices[i + 1].X - vertices[i].X);
+                    float y = vertices[i].Y + t * (vertices[i + 1].Y - vertices[i].Y);
+                    result.Add(new PointF(x, y));
+                }
+            }
+
+            result.Add(vertices[vertices.Count - 1]);
+            return result;
         }
 
         private List<PointF> ExtractLinePath(PowerPoint.Shape shape)

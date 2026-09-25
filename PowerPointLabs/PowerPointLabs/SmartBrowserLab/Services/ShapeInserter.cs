@@ -46,17 +46,7 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 PowerPoint.Slide srcSlide = srcPres.Slides[item.PptxSlide];
                 PowerPoint.Shape srcShape = srcSlide.Shapes[item.PptxShapeIndex];
 
-                srcShape.Copy();
-                System.Threading.Thread.Sleep(200);
-                var pastedRange = targetSlide.Shapes.Paste();
-                PowerPoint.Shape pasted = pastedRange[1];
-
-                float slideWidth = targetSlide.CustomLayout.Width;
-                float slideHeight = targetSlide.CustomLayout.Height;
-                pasted.Left = (slideWidth - pasted.Width) / 2;
-                pasted.Top = (slideHeight - pasted.Height) / 2;
-
-                return pasted;
+                return CopyShapeWithRetry(srcShape, targetSlide);
             }
             catch (Exception)
             {
@@ -114,6 +104,34 @@ namespace PowerPointLabs.SmartBrowserLab.Services
             }
 
             _presentationCache.Clear();
+        }
+
+        private PowerPoint.Shape CopyShapeWithRetry(PowerPoint.Shape srcShape, PowerPoint.Slide targetSlide)
+        {
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                try
+                {
+                    srcShape.Copy();
+                    System.Threading.Thread.Sleep(300 + attempt * 200);
+                    var pastedRange = targetSlide.Shapes.Paste();
+                    System.Threading.Thread.Sleep(100);
+                    PowerPoint.Shape pasted = pastedRange[1];
+
+                    float slideWidth = targetSlide.CustomLayout.Width;
+                    float slideHeight = targetSlide.CustomLayout.Height;
+                    pasted.Left = (slideWidth - pasted.Width) / 2;
+                    pasted.Top = (slideHeight - pasted.Height) / 2;
+
+                    return pasted;
+                }
+                catch (Exception)
+                {
+                    System.Threading.Thread.Sleep(500);
+                }
+            }
+
+            return null;
         }
 
         private string FindPptxFile(string pptxFileName)
@@ -203,7 +221,12 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 try
                 {
                     int count = cached.Slides.Count;
-                    return cached;
+                    if (count > 0)
+                    {
+                        return cached;
+                    }
+
+                    _presentationCache.Remove(pptxPath);
                 }
                 catch
                 {
