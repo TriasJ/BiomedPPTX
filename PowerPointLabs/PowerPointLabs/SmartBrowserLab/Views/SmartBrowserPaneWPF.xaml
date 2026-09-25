@@ -127,7 +127,10 @@
                     <MenuItem x:Name="insertEditableMenuItem" Header="Insert as Editable Shape" Click="InsertEditable_Click"/>
                     <MenuItem x:Name="insertImageMenuItem" Header="Insert as Image" Click="InsertImage_Click"/>
                     <Separator/>
-                    <MenuItem x:Name="useAsPatternMenuItem" Header="Use as Pattern Brush" Click="UseAsPattern_Click"/>
+                    <MenuItem x:Name="useAsPathPatternMenuItem" Header="Use as Path Pattern (1D)" Click="UseAsPathPattern_Click"
+                              ToolTip="Tile this illustration along shape outlines (lines, circles, stars)"/>
+                    <MenuItem x:Name="useAsFillPatternMenuItem" Header="Use as Fill Pattern (2D)" Click="UseAsFillPattern_Click"
+                              ToolTip="Fill an area with this illustration in a grid pattern"/>
                 </ContextMenu>
             </ListBox.ContextMenu>
         </ListBox>

@@ -107,7 +107,23 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 float jitter = (float)jitterSlider.Value;
                 float angleOffset = (float)angleOffsetSlider.Value;
 
-                if (_selectedPattern.Axis == "both")
+                string mode = GetApplyMode();
+                bool useGridFill;
+
+                if (mode == "fill")
+                {
+                    useGridFill = true;
+                }
+                else if (mode == "outline")
+                {
+                    useGridFill = false;
+                }
+                else
+                {
+                    useGridFill = _selectedPattern.Axis == "both";
+                }
+
+                if (useGridFill)
                 {
                     var bounds = new RectangleF(shape.Left, shape.Top, shape.Width, shape.Height);
                     float offsetPt = _selectedPattern.OffsetAmount > 0
@@ -202,6 +218,12 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         public void AddCustomPattern(SmartBrowserLab.Views.IllustrationViewModel item)
         {
+            string axis = "horizontal";
+            if (item.Source == "both")
+            {
+                axis = "both";
+            }
+
             var pattern = new PatternViewModel
             {
                 Id = item.Id,
@@ -211,14 +233,14 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 PptxFile = item.PptxFile,
                 PptxSlide = item.PptxSlide,
                 PptxShapeIndex = item.PptxShapeIndex,
-                Axis = "horizontal",
-                DefaultOverlap = 5,
+                Axis = axis,
+                DefaultOverlap = 0,
                 TileWidth = item.Width > 0 ? item.Width : 50,
                 TileHeight = item.Height > 0 ? item.Height : 50,
-                OffsetRows = false,
+                OffsetRows = axis == "both",
                 OffsetAmount = 0,
                 SvgWidth = item.Width > 0 ? item.Width : 50,
-                BorderColor = "#9B59B6"
+                BorderColor = axis == "both" ? "#FF8C00" : "#9B59B6"
             };
 
             if (!_patterns.Any(p => p.Id == pattern.Id))
@@ -294,6 +316,25 @@ namespace PowerPointLabs.PatternBrushLab.Views
             if (offsetYValueText != null)
             {
                 offsetYValueText.Text = string.Format("{0} pt", (int)offsetYSlider.Value);
+            }
+        }
+
+        private void ApplyMode_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            string mode = GetApplyMode();
+            if (mode == "fill")
+            {
+                if (offsetYGrid != null)
+                {
+                    offsetYGrid.Visibility = Visibility.Visible;
+                }
+            }
+            else if (mode == "outline")
+            {
+                if (offsetYGrid != null)
+                {
+                    offsetYGrid.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -490,6 +531,22 @@ namespace PowerPointLabs.PatternBrushLab.Views
                     BorderColor = borderColor
                 });
             }
+        }
+
+        private string GetApplyMode()
+        {
+            if (applyModeBox == null || applyModeBox.SelectedItem == null)
+            {
+                return "auto";
+            }
+
+            ComboBoxItem item = applyModeBox.SelectedItem as ComboBoxItem;
+            if (item != null && item.Tag != null)
+            {
+                return item.Tag.ToString();
+            }
+
+            return "auto";
         }
 
         private string GetSelectedAxis()

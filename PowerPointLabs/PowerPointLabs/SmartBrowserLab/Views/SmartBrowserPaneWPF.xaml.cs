@@ -495,7 +495,17 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             InsertSelectedShape(asEditable: false);
         }
 
-        private void UseAsPattern_Click(object sender, RoutedEventArgs e)
+        private void UseAsPathPattern_Click(object sender, RoutedEventArgs e)
+        {
+            SendToPatternBrush("horizontal");
+        }
+
+        private void UseAsFillPattern_Click(object sender, RoutedEventArgs e)
+        {
+            SendToPatternBrush("both");
+        }
+
+        private void SendToPatternBrush(string axis)
         {
             var selected = illustrationList.SelectedItem as IllustrationViewModel;
             if (selected == null)
@@ -503,6 +513,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                 return;
             }
 
+            selected.Source = axis;
             PatternBrushLab.Views.PatternBrushPaneWPF.PendingCustomPattern = selected;
 
             try
@@ -527,7 +538,8 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             {
             }
 
-            statusText.Text = "Sent to Pattern Brush: " + selected.Name;
+            string modeLabel = axis == "both" ? "Fill (2D)" : "Path (1D)";
+            statusText.Text = string.Format("Sent to Pattern Brush as {0}: {1}", modeLabel, selected.Name);
         }
 
         private string FindSmartLibraryPath()

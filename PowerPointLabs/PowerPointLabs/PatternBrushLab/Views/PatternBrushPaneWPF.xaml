@@ -82,6 +82,27 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Mode:" FontSize="11" VerticalAlignment="Center"
+                           Foreground="#666666"/>
+                <ComboBox x:Name="applyModeBox" Grid.Column="1" Margin="6,0,0,0" FontSize="11"
+                          Height="24" SelectedIndex="0" SelectionChanged="ApplyMode_Changed"
+                          Foreground="Black">
+                    <ComboBox.Resources>
+                        <Style TargetType="TextBlock"/>
+                    </ComboBox.Resources>
+                    <ComboBoxItem Content="Auto" Tag="auto"
+                                  ToolTip="Uses pattern default: 1D tiles along path/outline, 2D fills area"/>
+                    <ComboBoxItem Content="Along Outline" Tag="outline"
+                                  ToolTip="Tile along the shape perimeter (circles, stars, any shape)"/>
+                    <ComboBoxItem Content="Fill Area" Tag="fill"
+                                  ToolTip="Fill the shape bounding box with a grid pattern"/>
+                </ComboBox>
+            </Grid>
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="Offset X:" FontSize="11" VerticalAlignment="Center"

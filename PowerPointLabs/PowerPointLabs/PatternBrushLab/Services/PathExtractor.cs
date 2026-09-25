@@ -26,10 +26,125 @@ namespace PowerPointLabs.PatternBrushLab.Services
 
             if (shape.Type == MsoShapeType.msoAutoShape)
             {
-                return ExtractLinePath(shape);
+                return ExtractAutoShapePath(shape);
             }
 
             return ExtractLinePath(shape);
+        }
+
+        private List<PointF> ExtractAutoShapePath(PowerPoint.Shape shape)
+        {
+            PowerPoint.Slide slide = null;
+            try
+            {
+                slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide as PowerPoint.Slide;
+            }
+            catch (Exception)
+            {
+            }
+
+            if (slide == null)
+            {
+                return GenerateOutlinePath(shape);
+            }
+
+            PowerPoint.Shape duplicate = null;
+            try
+            {
+                shape.Copy();
+                System.Threading.Thread.Sleep(150);
+                slide.Shapes.Paste();
+                System.Threading.Thread.Sleep(100);
+                duplicate = slide.Shapes[slide.Shapes.Count];
+
+                dynamic dynDup = duplicate;
+                PowerPoint.Shape freeform = null;
+                try
+                {
+                    freeform = dynDup.ConvertToFreeform();
+                    System.Threading.Thread.Sleep(100);
+                }
+                catch (Exception)
+                {
+                }
+
+                PowerPoint.Shape shapeToExtract = freeform != null ? freeform : duplicate;
+
+                List<PointF> path;
+                if (shapeToExtract.Type == MsoShapeType.msoFreeform)
+                {
+                    path = ExtractFreeformPath(shapeToExtract);
+                }
+                else
+                {
+                    path = GenerateOutlinePath(shapeToExtract);
+                }
+
+                if (path.Count > 2)
+                {
+                    float dist = Distance(path[0], path[path.Count - 1]);
+                    if (dist > 1.0f)
+                    {
+                        path.Add(path[0]);
+                    }
+                }
+
+                try
+                {
+                    shapeToExtract.Delete();
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        if (duplicate != null)
+                        {
+                            duplicate.Delete();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                return path;
+            }
+            catch (Exception)
+            {
+                if (duplicate != null)
+                {
+                    try
+                    {
+                        duplicate.Delete();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                return GenerateOutlinePath(shape);
+            }
+        }
+
+        private List<PointF> GenerateOutlinePath(PowerPoint.Shape shape)
+        {
+            float cx = shape.Left + shape.Width / 2;
+            float cy = shape.Top + shape.Height / 2;
+            float rx = shape.Width / 2;
+            float ry = shape.Height / 2;
+
+            var points = new List<PointF>();
+            int segments = 72;
+
+            for (int i = 0; i <= segments; i++)
+            {
+                double angle = 2.0 * Math.PI * i / segments;
+                float x = cx + rx * (float)Math.Cos(angle);
+                float y = cy + ry * (float)Math.Sin(angle);
+                points.Add(new PointF(x, y));
+            }
+
+            return points;
         }
 
         private List<PointF> ExtractLinePath(PowerPoint.Shape shape)
