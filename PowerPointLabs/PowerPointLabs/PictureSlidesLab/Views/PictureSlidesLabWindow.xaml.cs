@@ -87,6 +87,7 @@ namespace PowerPointLabs.PictureSlidesLab.Views
 
         public PictureSlidesLabWindow()
         {
+            EnsureMahAppsTheme();
             InitializeComponent();
             // start loading process
             EveryDayPhrase.Text = new EveryDayPhraseService().GetEveryDayPhrase();
@@ -98,6 +99,46 @@ namespace PowerPointLabs.PictureSlidesLab.Views
             Logger.Log("PSL begins");
 
             SetTimeout(Init, 800);
+        }
+
+        private static void EnsureMahAppsTheme()
+        {
+            try
+            {
+                if (System.Windows.Application.Current == null)
+                {
+                    return;
+                }
+
+                var resources = System.Windows.Application.Current.Resources;
+                if (resources.MergedDictionaries.Count == 0 ||
+                    !resources.Contains("AccentColorBrush"))
+                {
+                    resources.MergedDictionaries.Add(new ResourceDictionary
+                    {
+                        Source = new Uri("pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml")
+                    });
+                    resources.MergedDictionaries.Add(new ResourceDictionary
+                    {
+                        Source = new Uri("pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml")
+                    });
+                    resources.MergedDictionaries.Add(new ResourceDictionary
+                    {
+                        Source = new Uri("pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml")
+                    });
+                    resources.MergedDictionaries.Add(new ResourceDictionary
+                    {
+                        Source = new Uri("pack://application:,,,/MahApps.Metro;component/Styles/Accents/Blue.xaml")
+                    });
+                    resources.MergedDictionaries.Add(new ResourceDictionary
+                    {
+                        Source = new Uri("pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml")
+                    });
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void Init()
