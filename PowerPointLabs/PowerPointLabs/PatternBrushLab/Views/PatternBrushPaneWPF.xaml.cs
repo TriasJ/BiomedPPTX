@@ -43,28 +43,26 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         public void Initialize(string dbPath, string assetsBasePath)
         {
-            if (_isInitialized)
+            if (!_isInitialized)
             {
-                return;
-            }
-
-            try
-            {
-                _basePath = assetsBasePath;
-                _database = new SmartDatabase(dbPath, assetsBasePath);
-                _shapeInserter = new ShapeInserter(Path.Combine(assetsBasePath, ".."));
-                LoadTileablePatterns();
-                _isInitialized = true;
-
-                if (PendingCustomPattern != null)
+                try
                 {
-                    AddCustomPattern(PendingCustomPattern);
-                    PendingCustomPattern = null;
+                    _basePath = assetsBasePath;
+                    _database = new SmartDatabase(dbPath, assetsBasePath);
+                    _shapeInserter = new ShapeInserter(Path.Combine(assetsBasePath, ".."));
+                    LoadTileablePatterns();
+                    _isInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    selectedPatternText.Text = "Error: " + ex.Message;
                 }
             }
-            catch (Exception ex)
+
+            if (PendingCustomPattern != null)
             {
-                selectedPatternText.Text = "Error: " + ex.Message;
+                AddCustomPattern(PendingCustomPattern);
+                PendingCustomPattern = null;
             }
         }
 
