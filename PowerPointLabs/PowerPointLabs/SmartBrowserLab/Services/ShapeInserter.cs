@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using PowerPointLabs.ActionFramework.Common.Extension;
 using PowerPointLabs.SmartBrowserLab.Models;
 
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
@@ -110,12 +111,37 @@ namespace PowerPointLabs.SmartBrowserLab.Services
         {
             string lastError = "";
 
-            for (int attempt = 0; attempt < 3; attempt++)
+            if (PPLClipboard.Instance != null)
+            {
+                try
+                {
+                    PowerPoint.Shape result = PPLClipboard.Instance.LockAndRelease(() =>
+                    {
+                        srcShape.Copy();
+                        System.Threading.Thread.Sleep(200);
+                        var pr = targetSlide.Shapes.Paste();
+                        PowerPoint.Shape p = pr[1];
+                        p.Left = 100;
+                        p.Top = 100;
+                        return p;
+                    });
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    lastError = "PPLClipboard: " + ex.Message;
+                }
+            }
+
+            for (int attempt = 0; attempt < 2; attempt++)
             {
                 try
                 {
                     srcShape.Copy();
-                    System.Threading.Thread.Sleep(400 + attempt * 300);
+                    System.Threading.Thread.Sleep(500 + attempt * 500);
                     var pastedRange = targetSlide.Shapes.Paste();
                     System.Threading.Thread.Sleep(200);
                     PowerPoint.Shape pasted = pastedRange[1];
@@ -125,7 +151,7 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 }
                 catch (Exception ex)
                 {
-                    lastError = "Clipboard attempt " + (attempt + 1) + ": " + ex.Message;
+                    lastError += " | Direct " + (attempt + 1) + ": " + ex.Message;
                     System.Threading.Thread.Sleep(500);
                 }
             }
