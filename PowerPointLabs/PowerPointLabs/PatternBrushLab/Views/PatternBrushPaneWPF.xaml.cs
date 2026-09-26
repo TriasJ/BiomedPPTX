@@ -72,6 +72,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
         {
             if (_selectedPattern == null)
             {
+                selectedPatternText.Text = "No pattern selected";
                 return;
             }
 
@@ -82,11 +83,7 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
                 if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes)
                 {
-                    string msg = _selectedPattern.Axis == "both"
-                        ? "Please select a shape to define the fill area."
-                        : "Please select a line or freeform shape first.";
-                    System.Windows.MessageBox.Show(msg,
-                        "BiomedPPTX", MessageBoxButton.OK, MessageBoxImage.Information);
+                    selectedPatternText.Text = "Select a shape on the slide first";
                     return;
                 }
 
@@ -94,8 +91,11 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 PowerPoint.Slide slide = app.ActiveWindow.View.Slide as PowerPoint.Slide;
                 if (slide == null)
                 {
+                    selectedPatternText.Text = "Error: no active slide";
                     return;
                 }
+
+                selectedPatternText.Text = string.Format("Applying {0}...", _selectedPattern.Name);
 
                 var pathPoints = _pathExtractor.ExtractPath(shape);
                 float overlapX = (float)offsetXSlider.Value;
@@ -162,9 +162,17 @@ namespace PowerPointLabs.PatternBrushLab.Views
                     Name = _selectedPattern.Name
                 };
 
+                if (_shapeInserter == null)
+                {
+                    selectedPatternText.Text = "Error: not initialized";
+                    return;
+                }
+
                 PowerPoint.Shape firstTile = _shapeInserter.InsertTileFromSource(tileItem, slide, app);
                 if (firstTile == null)
                 {
+                    selectedPatternText.Text = string.Format("Insert failed: {0} s{1} sh{2}",
+                        tileItem.PptxFile, tileItem.PptxSlide, tileItem.PptxShapeIndex);
                     return;
                 }
 
@@ -607,9 +615,17 @@ namespace PowerPointLabs.PatternBrushLab.Views
                     Name = _selectedPattern.Name
                 };
 
+                if (_shapeInserter == null)
+                {
+                    selectedPatternText.Text = "Error: not initialized";
+                    return;
+                }
+
                 PowerPoint.Shape firstTile = _shapeInserter.InsertTileFromSource(tileItem, slide, app);
                 if (firstTile == null)
                 {
+                    selectedPatternText.Text = string.Format("Insert failed: {0} s{1} sh{2}",
+                        tileItem.PptxFile, tileItem.PptxSlide, tileItem.PptxShapeIndex);
                     return;
                 }
 
