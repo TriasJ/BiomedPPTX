@@ -107,12 +107,12 @@ namespace PowerPointLabs.PictureSlidesLab.Views
             {
                 if (System.Windows.Application.Current == null)
                 {
-                    return;
+                    new System.Windows.Application();
+                    System.Windows.Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                 }
 
                 var resources = System.Windows.Application.Current.Resources;
-                if (resources.MergedDictionaries.Count == 0 ||
-                    !resources.Contains("AccentColorBrush"))
+                if (!resources.Contains("AccentColorBrush"))
                 {
                     resources.MergedDictionaries.Add(new ResourceDictionary
                     {
