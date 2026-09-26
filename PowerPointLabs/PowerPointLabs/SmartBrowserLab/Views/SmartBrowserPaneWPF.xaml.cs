@@ -573,6 +573,229 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             return searchPaths[0];
         }
 
+        private void RecolorToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (recolorPanel != null)
+            {
+                recolorPanel.Visibility = recolorToggle.IsChecked == true
+                    ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private void HueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (hueValueText != null)
+            {
+                hueValueText.Text = string.Format("{0}", (int)hueSlider.Value);
+            }
+        }
+
+        private void SatSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (satValueText != null)
+            {
+                satValueText.Text = string.Format("{0}%", (int)satSlider.Value);
+            }
+        }
+
+        private void ApplyRecolor_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.ActiveWindow.Selection;
+                if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes)
+                {
+                    statusText.Text = "Select a grouped shape on the slide first";
+                    return;
+                }
+
+                float hueShift = (float)hueSlider.Value;
+                float satScale = (float)satSlider.Value / 100f;
+
+                for (int i = 1; i <= sel.ShapeRange.Count; i++)
+                {
+                    RecolorShape(sel.ShapeRange[i], hueShift, satScale);
+                }
+
+                statusText.Text = string.Format("Recolored with hue {0}, sat {1}%", (int)hueShift, (int)(satScale * 100));
+            }
+            catch (Exception ex)
+            {
+                statusText.Text = "Recolor error: " + ex.Message;
+            }
+        }
+
+        private void RecolorShape(PowerPoint.Shape shape, float hueShift, float satScale)
+        {
+            if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
+            {
+                for (int i = 1; i <= shape.GroupItems.Count; i++)
+                {
+                    RecolorShape(shape.GroupItems[i], hueShift, satScale);
+                }
+
+                return;
+            }
+
+            try
+            {
+                if (shape.Fill.Visible == Microsoft.Office.Core.MsoTriState.msoTrue &&
+                    shape.Fill.Type == Microsoft.Office.Core.MsoFillType.msoFillSolid)
+                {
+                    int rgb = shape.Fill.ForeColor.RGB;
+                    int newRgb = ShiftHueSaturation(rgb, hueShift, satScale);
+                    if (newRgb != rgb)
+                    {
+                        shape.Fill.ForeColor.RGB = newRgb;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                if (shape.Line.Visible == Microsoft.Office.Core.MsoTriState.msoTrue)
+                {
+                    int rgb = shape.Line.ForeColor.RGB;
+                    int newRgb = ShiftHueSaturation(rgb, hueShift, satScale);
+                    if (newRgb != rgb)
+                    {
+                        shape.Line.ForeColor.RGB = newRgb;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private int ShiftHueSaturation(int rgb, float hueShift, float satScale)
+        {
+            int r = rgb & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = (rgb >> 16) & 0xFF;
+
+            if (r > 240 && g > 240 && b > 240)
+            {
+                return rgb;
+            }
+
+            if (r < 15 && g < 15 && b < 15)
+            {
+                return rgb;
+            }
+
+            int maxC = Math.Max(r, Math.Max(g, b));
+            int minC = Math.Min(r, Math.Min(g, b));
+            if (maxC - minC < 20)
+            {
+                return rgb;
+            }
+
+            float rf = r / 255f;
+            float gf = g / 255f;
+            float bf = b / 255f;
+            float max = Math.Max(rf, Math.Max(gf, bf));
+            float min = Math.Min(rf, Math.Min(gf, bf));
+            float l = (max + min) / 2f;
+            float h = 0;
+            float s = 0;
+
+            if (max != min)
+            {
+                float d = max - min;
+                s = l > 0.5f ? d / (2f - max - min) : d / (max + min);
+
+                if (max == rf)
+                {
+                    h = (gf - bf) / d + (gf < bf ? 6f : 0f);
+                }
+                else if (max == gf)
+                {
+                    h = (bf - rf) / d + 2f;
+                }
+                else
+                {
+                    h = (rf - gf) / d + 4f;
+                }
+
+                h /= 6f;
+            }
+
+            h += hueShift / 360f;
+            while (h < 0)
+            {
+                h += 1f;
+            }
+
+            while (h > 1)
+            {
+                h -= 1f;
+            }
+
+            s = Math.Min(1f, Math.Max(0f, s * satScale));
+
+            float r2;
+            float g2;
+            float b2;
+            if (s == 0)
+            {
+                r2 = l;
+                g2 = l;
+                b2 = l;
+            }
+            else
+            {
+                float q = l < 0.5f ? l * (1f + s) : l + s - l * s;
+                float p = 2f * l - q;
+                r2 = HueToRgb(p, q, h + 1f / 3f);
+                g2 = HueToRgb(p, q, h);
+                b2 = HueToRgb(p, q, h - 1f / 3f);
+            }
+
+            int nr = (int)Math.Round(r2 * 255);
+            int ng = (int)Math.Round(g2 * 255);
+            int nb = (int)Math.Round(b2 * 255);
+            nr = Math.Max(0, Math.Min(255, nr));
+            ng = Math.Max(0, Math.Min(255, ng));
+            nb = Math.Max(0, Math.Min(255, nb));
+
+            return nr | (ng << 8) | (nb << 16);
+        }
+
+        private float HueToRgb(float p, float q, float t)
+        {
+            if (t < 0f)
+            {
+                t += 1f;
+            }
+
+            if (t > 1f)
+            {
+                t -= 1f;
+            }
+
+            if (t < 1f / 6f)
+            {
+                return p + (q - p) * 6f * t;
+            }
+
+            if (t < 1f / 2f)
+            {
+                return q;
+            }
+
+            if (t < 2f / 3f)
+            {
+                return p + (q - p) * (2f / 3f - t) * 6f;
+            }
+
+            return p;
+        }
+
         #endregion
     }
 }

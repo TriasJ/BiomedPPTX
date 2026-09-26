@@ -31,6 +31,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Search bar -->
@@ -135,8 +136,47 @@
             </ListBox.ContextMenu>
         </ListBox>
 
+        <!-- Recolor panel -->
+        <StackPanel Grid.Row="4" Margin="8,0,8,4">
+            <ToggleButton x:Name="recolorToggle" Content="Recolor" Height="24" FontSize="11"
+                          Margin="0,0,0,4" Checked="RecolorToggle_Changed" Unchecked="RecolorToggle_Changed"
+                          ToolTip="Adjust hue and saturation of selected grouped shapes on the slide (SMART shapes only, not BioArt images)"/>
+            <StackPanel x:Name="recolorPanel" Visibility="Collapsed">
+                <Grid Margin="0,2,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Hue:" FontSize="11" VerticalAlignment="Center" Foreground="#666666"/>
+                    <Slider x:Name="hueSlider" Grid.Column="1" Minimum="-180" Maximum="180" Value="0"
+                            Margin="6,0,6,0" VerticalAlignment="Center"
+                            ValueChanged="HueSlider_ValueChanged"
+                            TickFrequency="15" IsSnapToTickEnabled="True"/>
+                    <TextBlock x:Name="hueValueText" Grid.Column="2" FontSize="11"
+                               VerticalAlignment="Center" Foreground="#666666" Text="0"/>
+                </Grid>
+                <Grid Margin="0,2,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Sat:" FontSize="11" VerticalAlignment="Center" Foreground="#666666"/>
+                    <Slider x:Name="satSlider" Grid.Column="1" Minimum="0" Maximum="200" Value="100"
+                            Margin="6,0,6,0" VerticalAlignment="Center"
+                            ValueChanged="SatSlider_ValueChanged"
+                            TickFrequency="10" IsSnapToTickEnabled="True"/>
+                    <TextBlock x:Name="satValueText" Grid.Column="2" FontSize="11"
+                               VerticalAlignment="Center" Foreground="#666666" Text="100%"/>
+                </Grid>
+                <Button x:Name="applyRecolorButton" Content="Apply Recolor" Height="24" FontSize="11"
+                        Margin="0,4,0,0" Click="ApplyRecolor_Click"/>
+            </StackPanel>
+        </StackPanel>
+
         <!-- Status bar -->
-        <Grid Grid.Row="4" Margin="8,0,8,8">
+        <Grid Grid.Row="5" Margin="8,0,8,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
