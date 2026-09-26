@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.Office.Core;
@@ -52,10 +53,30 @@ namespace PowerPointLabs.PictureSlidesLab.Service
             // generate styles
             EffectsDesignerForPreview = CreateEffectsHandlerForPreview();
 
-            AggregateCatalog catalog = new AggregateCatalog(
-                new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-            CompositionContainer container = new CompositionContainer(catalog);
-            container.ComposeParts(this);
+            try
+            {
+                AggregateCatalog catalog = new AggregateCatalog(
+                    new AssemblyCatalog(Assembly.GetExecutingAssembly()));
+                CompositionContainer container = new CompositionContainer(catalog);
+                container.ComposeParts(this);
+            }
+            catch (ReflectionTypeLoadException)
+            {
+                AggregateCatalog safeCatalog = new AggregateCatalog();
+                foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
+                {
+                    try
+                    {
+                        safeCatalog.Catalogs.Add(new TypeCatalog(type));
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                CompositionContainer container = new CompositionContainer(safeCatalog);
+                container.ComposeParts(this);
+            }
         }
 
         public void SetStyleOptions(StyleOption opt)
@@ -183,5 +204,17 @@ namespace PowerPointLabs.PictureSlidesLab.Service
         }
         
         #endregion
+
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null);
+            }
+        }
     }
 }
