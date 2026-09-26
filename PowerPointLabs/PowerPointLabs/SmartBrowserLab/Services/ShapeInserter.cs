@@ -108,29 +108,41 @@ namespace PowerPointLabs.SmartBrowserLab.Services
 
         private PowerPoint.Shape CopyShapeWithRetry(PowerPoint.Shape srcShape, PowerPoint.Slide targetSlide)
         {
+            string lastError = "";
             for (int attempt = 0; attempt < 3; attempt++)
             {
                 try
                 {
                     srcShape.Copy();
+                    try
+                    {
+                        ((PowerPoint._Presentation)srcShape.Parent.Parent).Saved = Microsoft.Office.Core.MsoTriState.msoTrue;
+                    }
+                    catch (Exception)
+                    {
+                    }
+
                     System.Threading.Thread.Sleep(300 + attempt * 200);
                     var pastedRange = targetSlide.Shapes.Paste();
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(150);
                     PowerPoint.Shape pasted = pastedRange[1];
 
-                    float slideWidth = targetSlide.CustomLayout.Width;
-                    float slideHeight = targetSlide.CustomLayout.Height;
-                    pasted.Left = (slideWidth - pasted.Width) / 2;
-                    pasted.Top = (slideHeight - pasted.Height) / 2;
+                    pasted.Left = 100;
+                    pasted.Top = 100;
 
                     return pasted;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    lastError = ex.Message;
                     System.Threading.Thread.Sleep(500);
                 }
             }
 
+            System.Diagnostics.Debug.WriteLine("CopyShapeWithRetry failed after 3 attempts: " + lastError);
+            System.IO.File.AppendAllText(
+                System.IO.Path.Combine(System.IO.Path.GetTempPath(), "BiomedPPTX_Insert_Error.txt"),
+                System.DateTime.Now.ToString() + " CopyShapeWithRetry: " + lastError + "\n");
             return null;
         }
 
