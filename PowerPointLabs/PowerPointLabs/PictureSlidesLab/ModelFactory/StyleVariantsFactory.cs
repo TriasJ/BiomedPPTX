@@ -26,9 +26,19 @@ namespace PowerPointLabs.PictureSlidesLab.ModelFactory
 
         public StyleVariantsFactory()
         {
-            AggregateCatalog catalog = new AggregateCatalog(
-                new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-            CompositionContainer container = new CompositionContainer(catalog);
+            AggregateCatalog safeCatalog = new AggregateCatalog();
+            foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
+            {
+                try
+                {
+                    safeCatalog.Catalogs.Add(new TypeCatalog(type));
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            CompositionContainer container = new CompositionContainer(safeCatalog);
             container.ComposeParts(this);
         }
 
@@ -47,6 +57,17 @@ namespace PowerPointLabs.PictureSlidesLab.ModelFactory
         public IEnumerable<IStyleVariants> GetAllStyleVariants()
         {
             return ImportedStyleVariants.Select(variants => variants.Value);
+        }
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null);
+            }
         }
     }
 }
