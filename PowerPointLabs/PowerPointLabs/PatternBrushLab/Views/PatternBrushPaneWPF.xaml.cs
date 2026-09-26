@@ -280,14 +280,16 @@ namespace PowerPointLabs.PatternBrushLab.Views
 
         private void PatternList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _selectedPattern = patternList.SelectedItem as PatternViewModel;
-            if (_selectedPattern != null)
+            PatternViewModel newSelection = patternList.SelectedItem as PatternViewModel;
+            if (newSelection != null)
             {
+                _selectedPattern = newSelection;
                 selectedPatternText.Text = string.Format("{0} ({1})", _selectedPattern.Name, _selectedPattern.Axis);
                 offsetXSlider.Value = _selectedPattern.DefaultOverlap;
                 applyButton.IsEnabled = true;
 
-                if (_selectedPattern.Axis == "both")
+                string mode = GetApplyMode();
+                if (_selectedPattern.Axis == "both" || mode == "fill")
                 {
                     offsetYGrid.Visibility = Visibility.Visible;
                     offsetYSlider.Value = _selectedPattern.DefaultOverlap * 0.67;
@@ -296,12 +298,6 @@ namespace PowerPointLabs.PatternBrushLab.Views
                 {
                     offsetYGrid.Visibility = Visibility.Collapsed;
                 }
-            }
-            else
-            {
-                selectedPatternText.Text = "No pattern selected";
-                applyButton.IsEnabled = false;
-                offsetYGrid.Visibility = Visibility.Collapsed;
             }
         }
 
