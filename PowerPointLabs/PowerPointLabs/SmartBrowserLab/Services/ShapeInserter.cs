@@ -109,40 +109,62 @@ namespace PowerPointLabs.SmartBrowserLab.Services
         private PowerPoint.Shape CopyShapeWithRetry(PowerPoint.Shape srcShape, PowerPoint.Slide targetSlide)
         {
             string lastError = "";
+
             for (int attempt = 0; attempt < 3; attempt++)
             {
                 try
                 {
                     srcShape.Copy();
+                    System.Threading.Thread.Sleep(400 + attempt * 300);
+                    var pastedRange = targetSlide.Shapes.Paste();
+                    System.Threading.Thread.Sleep(200);
+                    PowerPoint.Shape pasted = pastedRange[1];
+                    pasted.Left = 100;
+                    pasted.Top = 100;
+                    return pasted;
+                }
+                catch (Exception ex)
+                {
+                    lastError = "Clipboard attempt " + (attempt + 1) + ": " + ex.Message;
+                    System.Threading.Thread.Sleep(500);
+                }
+            }
+
+            try
+            {
+                string tempEmf = System.IO.Path.Combine(
+                    System.IO.Path.GetTempPath(),
+                    "biomedpptx_tile_" + System.DateTime.Now.Ticks + ".emf");
+
+                srcShape.Export(tempEmf, PowerPoint.PpShapeFormat.ppShapeFormatEMF);
+                System.Threading.Thread.Sleep(200);
+
+                if (System.IO.File.Exists(tempEmf))
+                {
+                    PowerPoint.Shape inserted = targetSlide.Shapes.AddPicture(
+                        tempEmf,
+                        Microsoft.Office.Core.MsoTriState.msoFalse,
+                        Microsoft.Office.Core.MsoTriState.msoTrue,
+                        100, 100);
                     try
                     {
-                        ((PowerPoint._Presentation)srcShape.Parent.Parent).Saved = Microsoft.Office.Core.MsoTriState.msoTrue;
+                        System.IO.File.Delete(tempEmf);
                     }
                     catch (Exception)
                     {
                     }
 
-                    System.Threading.Thread.Sleep(300 + attempt * 200);
-                    var pastedRange = targetSlide.Shapes.Paste();
-                    System.Threading.Thread.Sleep(150);
-                    PowerPoint.Shape pasted = pastedRange[1];
-
-                    pasted.Left = 100;
-                    pasted.Top = 100;
-
-                    return pasted;
-                }
-                catch (Exception ex)
-                {
-                    lastError = ex.Message;
-                    System.Threading.Thread.Sleep(500);
+                    return inserted;
                 }
             }
+            catch (Exception ex)
+            {
+                lastError += " | EMF fallback: " + ex.Message;
+            }
 
-            System.Diagnostics.Debug.WriteLine("CopyShapeWithRetry failed after 3 attempts: " + lastError);
             System.IO.File.AppendAllText(
                 System.IO.Path.Combine(System.IO.Path.GetTempPath(), "BiomedPPTX_Insert_Error.txt"),
-                System.DateTime.Now.ToString() + " CopyShapeWithRetry: " + lastError + "\n");
+                System.DateTime.Now.ToString() + " " + lastError + "\n");
             return null;
         }
 
@@ -251,7 +273,7 @@ namespace PowerPointLabs.SmartBrowserLab.Services
                 PowerPoint.Presentation pres = app.Presentations.Open(
                     pptxPath,
                     ReadOnly: Microsoft.Office.Core.MsoTriState.msoTrue,
-                    Untitled: Microsoft.Office.Core.MsoTriState.msoFalse,
+                    Untitled: Microsoft.Office.Core.MsoTriState.msoTrue,
                     WithWindow: Microsoft.Office.Core.MsoTriState.msoFalse);
                 pres.Saved = Microsoft.Office.Core.MsoTriState.msoTrue;
                 _presentationCache[pptxPath] = pres;
