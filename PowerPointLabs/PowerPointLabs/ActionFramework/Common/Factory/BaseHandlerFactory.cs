@@ -20,47 +20,20 @@ namespace PowerPointLabs.ActionFramework.Common.Factory
 
         protected BaseHandlerFactory()
         {
-            try
+            AggregateCatalog safeCatalog = new AggregateCatalog();
+            foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
             {
-                AggregateCatalog catalog = new AggregateCatalog(
-                    new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-                CompositionContainer container = new CompositionContainer(catalog);
-                container.ComposeParts(this);
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                string loaderMessages = "";
-                if (ex.LoaderExceptions != null)
+                try
                 {
-                    foreach (Exception le in ex.LoaderExceptions)
-                    {
-                        if (le != null)
-                        {
-                            loaderMessages += le.Message + "\n";
-                        }
-                    }
+                    safeCatalog.Catalogs.Add(new TypeCatalog(type));
                 }
-
-                System.Diagnostics.Debug.WriteLine("MEF ReflectionTypeLoadException: " + loaderMessages);
-                System.IO.File.WriteAllText(
-                    System.IO.Path.Combine(System.IO.Path.GetTempPath(), "BiomedPPTX_MEF_Error.txt"),
-                    "ReflectionTypeLoadException:\n" + loaderMessages + "\n\nStackTrace:\n" + ex.StackTrace);
-
-                AggregateCatalog safeCatalog = new AggregateCatalog();
-                foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
+                catch (Exception)
                 {
-                    try
-                    {
-                        safeCatalog.Catalogs.Add(new TypeCatalog(type));
-                    }
-                    catch
-                    {
-                    }
                 }
-
-                CompositionContainer container = new CompositionContainer(safeCatalog);
-                container.ComposeParts(this);
             }
+
+            CompositionContainer container = new CompositionContainer(safeCatalog);
+            container.ComposeParts(this);
         }
 
         public THandler CreateInstance(string ribbonId, string ribbonTag)

@@ -53,30 +53,20 @@ namespace PowerPointLabs.PictureSlidesLab.Service
             // generate styles
             EffectsDesignerForPreview = CreateEffectsHandlerForPreview();
 
-            try
+            AggregateCatalog safeCatalog = new AggregateCatalog();
+            foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
             {
-                AggregateCatalog catalog = new AggregateCatalog(
-                    new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-                CompositionContainer container = new CompositionContainer(catalog);
-                container.ComposeParts(this);
-            }
-            catch (ReflectionTypeLoadException)
-            {
-                AggregateCatalog safeCatalog = new AggregateCatalog();
-                foreach (Type type in GetLoadableTypes(Assembly.GetExecutingAssembly()))
+                try
                 {
-                    try
-                    {
-                        safeCatalog.Catalogs.Add(new TypeCatalog(type));
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    safeCatalog.Catalogs.Add(new TypeCatalog(type));
                 }
-
-                CompositionContainer container = new CompositionContainer(safeCatalog);
-                container.ComposeParts(this);
+                catch (Exception)
+                {
+                }
             }
+
+            CompositionContainer container = new CompositionContainer(safeCatalog);
+            container.ComposeParts(this);
         }
 
         public void SetStyleOptions(StyleOption opt)
