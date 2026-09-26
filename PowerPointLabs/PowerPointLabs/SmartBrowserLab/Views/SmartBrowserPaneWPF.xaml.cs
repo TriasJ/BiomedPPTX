@@ -519,6 +519,17 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             try
             {
                 Microsoft.Office.Tools.CustomTaskPane brushPane = Globals.ThisAddIn.GetActivePane(typeof(PatternBrushLab.PatternBrushPane));
+
+                if (brushPane == null)
+                {
+                    var control = new PatternBrushLab.PatternBrushPane();
+                    PowerPoint.DocumentWindow wnd = Globals.ThisAddIn.Application.ActiveWindow;
+                    brushPane = Globals.ThisAddIn.RegisterTaskPane(
+                        control,
+                        TextCollection.PatternBrushLabText.TaskPanelTitle,
+                        wnd);
+                }
+
                 if (brushPane != null)
                 {
                     brushPane.Visible = true;
