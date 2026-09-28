@@ -356,6 +356,40 @@ namespace PowerPointLabs
             return Ribbon;
         }
 
+        private static void DeploySqliteInterop()
+        {
+            try
+            {
+                string addInDir = AppDomain.CurrentDomain.BaseDirectory;
+                string x64Target = Path.Combine(addInDir, "x64", "SQLite.Interop.dll");
+                string x86Target = Path.Combine(addInDir, "x86", "SQLite.Interop.dll");
+
+                if (File.Exists(x64Target) && File.Exists(x86Target))
+                {
+                    return;
+                }
+
+                string assetsNative = Path.Combine(AppDataFolder, "Assets", "native");
+                string x64Source = Path.Combine(assetsNative, "x64", "SQLite.Interop.dll");
+                string x86Source = Path.Combine(assetsNative, "x86", "SQLite.Interop.dll");
+
+                if (File.Exists(x64Source))
+                {
+                    Directory.CreateDirectory(Path.Combine(addInDir, "x64"));
+                    File.Copy(x64Source, x64Target, true);
+                }
+
+                if (File.Exists(x86Source))
+                {
+                    Directory.CreateDirectory(Path.Combine(addInDir, "x86"));
+                    File.Copy(x86Source, x86Target, true);
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         private void SetupLogger()
         {
             // Check if folder exists and if not, create it
@@ -683,6 +717,7 @@ namespace PowerPointLabs
 
         private void ThisAddInStartup(object sender, EventArgs e)
         {
+            DeploySqliteInterop();
             SetupLogger();
             Logger.Log("PowerPointLabs Started");
 
