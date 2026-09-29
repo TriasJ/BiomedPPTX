@@ -10,7 +10,7 @@
                       BorderThickness="1"
                       BorderBrush="#0070c0"
                       ResizeMode="NoResize"
-                      Title="About PowerPointLabs"
+                      Title="About BiomedPPTX"
                       WindowStartupLocation="CenterScreen"
                       WindowTransitionsEnabled="False">
     <controls:MetroWindow.Resources>
@@ -40,8 +40,8 @@
                      HorizontalAlignment="Left">
             <FlowDocument>
                 <Paragraph>
-                    PowerPointLabs Version
-                    <Run x:Name="versionRunText">9.9.9.9</Run>
+                    BiomedPPTX Version
+                    <Run x:Name="versionRunText">0.4.0</Run>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
@@ -61,9 +61,9 @@
                     <Run x:Name="releaseDateRunText">31 Jan 1980</Run>
                     <LineBreak></LineBreak>
                     <LineBreak></LineBreak>
-                    Developed at School of Computing, National University of Singapore.
+                    Biomedical PowerPoint Extensions. Based on PowerPointLabs (NUS).
                     <LineBreak></LineBreak>
-                    For more information, visit our website at
+                    For more information, visit
                     <Hyperlink x:Name="websiteHyperlink" 
                                NavigateUri="http://website.com" 
                                RequestNavigate="Hyperlink_RequestNavigate">

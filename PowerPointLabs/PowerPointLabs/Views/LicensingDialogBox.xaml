@@ -1,0 +1,83 @@
+<Window x:Class="PowerPointLabs.Views.LicensingDialogBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BiomedPPTX — Licensing and Attribution"
+        Width="560" Height="520"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Licensing and Attribution" FontSize="18" FontWeight="Bold" Margin="0,0,0,12"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,0,0,8">
+                    This software includes the following components:
+                </TextBlock>
+
+                <TextBlock FontWeight="Bold" FontSize="13" Margin="0,8,0,2">BiomedPPTX</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    License: GNU General Public License v2.0 (GPLv2)
+                </TextBlock>
+                <TextBlock FontSize="11" Foreground="#0070C0">https://github.com/TriasJ/BiomedPPTX</TextBlock>
+
+                <TextBlock FontWeight="Bold" FontSize="13" Margin="0,12,0,2">PowerPointLabs</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    License: GNU General Public License v2.0 (GPLv2)
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    Copyright: School of Computing, National University of Singapore
+                </TextBlock>
+                <TextBlock FontSize="11" Foreground="#0070C0">https://github.com/PowerPointLabs/PowerPointLabs</TextBlock>
+
+                <TextBlock FontWeight="Bold" FontSize="13" Margin="0,12,0,2">SMART — Servier Medical ART</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    Copyright: Les Laboratoires Servier
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    Attribution required: "Illustrations adapted from SMART — Servier Medical ART (https://smart.servier.com/), licensed under CC BY 3.0"
+                </TextBlock>
+                <TextBlock FontSize="11" Foreground="#0070C0">https://smart.servier.com/</TextBlock>
+
+                <TextBlock FontWeight="Bold" FontSize="13" Margin="0,12,0,2">NCBI BioArt</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    License: Public Domain / CC-BY
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    Copyright: NIAID Visual and Medical Arts
+                </TextBlock>
+                <TextBlock FontSize="11" Foreground="#0070C0">https://bioart.niaid.nih.gov/</TextBlock>
+
+                <TextBlock FontWeight="Bold" FontSize="13" Margin="0,12,0,2">Third-Party Libraries</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    System.Data.SQLite — Public Domain
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    MahApps.Metro — MIT License
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    Newtonsoft.Json — MIT License
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#444">
+                    NAudio — MIT License
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Copy Attribution" Width="120" Height="28" Margin="0,0,8,0" Click="CopyAttribution_Click"
+                    ToolTip="Copy SMART and BioArt attribution text to clipboard"/>
+            <Button Content="Add Attribution Slide" Width="140" Height="28" Margin="0,0,8,0" Click="AddAttributionSlide_Click"
+                    ToolTip="Add a licensing and attribution slide to the current presentation"/>
+            <Button Content="Close" Width="70" Height="28" Click="Close_Click" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

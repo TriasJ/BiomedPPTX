@@ -382,6 +382,10 @@
     <Compile Include="ActionFramework\EffectsLab\Spotlight\SpotlightSettings\SpotlightSettingsActionHandler.cs" />
     <Compile Include="ActionFramework\EffectsLab\Spotlight\SpotlightSettings\SpotlightSettingsLabelHandler.cs" />
     <Compile Include="ActionFramework\EffectsLab\Spotlight\SpotlightSettings\SpotlightSettingsSupertipHandler.cs" />
+    <Compile Include="ActionFramework\Help\Licensing\LicensingActionHandler.cs" />
+    <Compile Include="ActionFramework\Help\Licensing\LicensingLabelHandler.cs" />
+    <Compile Include="ActionFramework\Help\Licensing\LicensingImageHandler.cs" />
+    <Compile Include="ActionFramework\Help\Licensing\LicensingSupertipHandler.cs" />
     <Compile Include="ActionFramework\Help\About\AboutActionHandler.cs" />
     <Compile Include="ActionFramework\Help\Feedback\FeedbackActionHandler.cs" />
     <Compile Include="ActionFramework\Help\About\AboutImageHandler.cs" />
@@ -1408,6 +1412,9 @@
     <Compile Include="Views\AboutDialogBox.xaml.cs">
       <DependentUpon>AboutDialogBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LicensingDialogBox.xaml.cs">
+      <DependentUpon>LicensingDialogBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ShortcutsLab\Views\EditNameDialogBox.xaml.cs">
       <DependentUpon>EditNameDialogBox.xaml</DependentUpon>
     </Compile>
@@ -2066,6 +2073,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AboutDialogBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LicensingDialogBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

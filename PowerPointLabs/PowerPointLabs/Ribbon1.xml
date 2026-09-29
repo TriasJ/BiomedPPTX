@@ -627,6 +627,12 @@
                     getImage="GetImage"
                     getSupertip="GetSupertip"
                     onAction="OnAction"/>
+            <button id="LicensingButton"
+                    tag="Licensing"
+                    getLabel="GetLabel"
+                    getImage="GetImage"
+                    getSupertip="GetSupertip"
+                    onAction="OnAction"/>
             <button id="AboutButton"
                     tag="About"
                     getLabel="GetLabel"
