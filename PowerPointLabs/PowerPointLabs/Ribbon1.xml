@@ -569,37 +569,28 @@
           </menu>
 
         </group>
-        <group id="BiomedBrowserGroup" label="Biomedical">
+        <group id="BiomedBrowserGroup"
+               getLabel="GetLabel"
+               getImage="GetImage">
           <button id="SmartBrowserButton"
                   tag="SmartBrowser"
-                  label="SMART Browser"
-                  screentip="SMART-Library Browser"
-                  supertip="Search, browse, and insert biomedical illustrations from the SMART Medical Illustrations library and NCBI BioArt."
+                  getLabel="GetLabel"
+                  getImage="GetImage"
+                  getSupertip="GetSupertip"
                   onAction="OnAction"
                   size="large"/>
         </group>
 
-        <group id="PatternBrushGroup" label="Pattern Brush">
+        <group id="PatternBrushGroup"
+               getLabel="GetLabel"
+               getImage="GetImage">
           <button id="PatternBrushButton"
                   tag="PatternBrush"
-                  label="Pattern Brush"
-                  screentip="Pattern Brush"
-                  supertip="Transform lines and freeforms into tiled biological patterns such as phospholipid bilayers, epithelial tissue, muscle fibers, and vascular stents."
+                  getLabel="GetLabel"
+                  getImage="GetImage"
+                  getSupertip="GetSupertip"
                   onAction="OnAction"
                   size="large"/>
-          <toggleButton id="PatternBrushModeToggle"
-                        tag="PatternBrushMode"
-                        label="Brush Mode"
-                        screentip="Brush Mode"
-                        supertip="When enabled, newly drawn lines and freeforms are automatically converted to the selected biological pattern."
-                        onAction="OnCheckBoxAction"
-                        getPressed="GetPressed"/>
-          <button id="ConvertToPatternButton"
-                  tag="ConvertToPattern"
-                  label="Apply Pattern"
-                  screentip="Apply Pattern to Selection"
-                  supertip="Apply the selected biological pattern to the currently selected line or freeform shape."
-                  onAction="OnAction"/>
         </group>
 
         <group id="Visibility" label="General">

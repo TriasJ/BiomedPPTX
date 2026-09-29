@@ -31,6 +31,8 @@
         public const string EffectsGroupLabel = "Effects";
         public const string FormattingGroupLabel = "Formatting";
         public const string MoreLabsGroupLabel = "More Labs";
+        public const string BiomedGroupLabel = "Biomedical";
+        public const string PatternBrushGroupLabel = "Pattern Brush";
 
         public const string RibbonMenu = "Menu";
         public const string AnimationsGroupId = "AnimationsGroup";
@@ -38,6 +40,8 @@
         public const string EffectsGroupId = "EffectsGroup";
         public const string FormattingGroupId = "FormattingGroup";
         public const string MoreLabsGroupId = "MoreLabsGroup";
+        public const string BiomedGroupId = "BiomedBrowserGroup";
+        public const string PatternBrushGroupId = "PatternBrushGroup";
         #endregion
 
         #region Dynamic Menu Labels

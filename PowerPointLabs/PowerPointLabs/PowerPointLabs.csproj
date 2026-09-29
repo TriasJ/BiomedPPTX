@@ -31,7 +31,7 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <DefineConstants>VSTO40</DefineConstants>
-    <IsWebBootstrapper>True</IsWebBootstrapper>
+    <IsWebBootstrapper>False</IsWebBootstrapper>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -42,8 +42,8 @@
     </NuGetPackageImportStamp>
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <PublishUrl>C:\publish_online\</PublishUrl>
-    <InstallUrl>https://www.comp.nus.edu.sg/~pptlabs/download/dev/</InstallUrl>
+    <PublishUrl>C:\Users\Eleonora Ocampo\Documents\__Scratch\BiomedPPTX\publish\</PublishUrl>
+    <InstallUrl />
     <TargetCulture>en</TargetCulture>
     <ApplicationVersion>6.1.0.2</ApplicationVersion>
     <AutoIncrementApplicationRevision>false</AutoIncrementApplicationRevision>
@@ -63,6 +63,11 @@
       <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 y x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -80,7 +85,7 @@
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.VSTORuntime.4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft Visual Studio 2010 Tools for Office Runtime %28x86 and x64%29</ProductName>
+      <ProductName>Runtime de Microsoft Visual Studio 2010 Tools para Office %28x86 y x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
@@ -914,7 +919,17 @@
     <Compile Include="PatternBrushLab\Services\PathExtractor.cs" />
     <Compile Include="PatternBrushLab\Services\BrushModeController.cs" />
     <Compile Include="ActionFramework\SmartBrowserLab\SmartBrowserActionHandler.cs" />
+    <Compile Include="ActionFramework\SmartBrowserLab\SmartBrowserImageHandler.cs" />
+    <Compile Include="ActionFramework\SmartBrowserLab\SmartBrowserLabelHandler.cs" />
+    <Compile Include="ActionFramework\SmartBrowserLab\SmartBrowserSupertipHandler.cs" />
     <Compile Include="ActionFramework\PatternBrushLab\PatternBrushActionHandler.cs" />
+    <Compile Include="ActionFramework\PatternBrushLab\PatternBrushImageHandler.cs" />
+    <Compile Include="ActionFramework\PatternBrushLab\PatternBrushLabelHandler.cs" />
+    <Compile Include="ActionFramework\PatternBrushLab\PatternBrushSupertipHandler.cs" />
+    <Compile Include="ActionFramework\RibbonGroups\BiomedGroupImageHandler.cs" />
+    <Compile Include="ActionFramework\RibbonGroups\BiomedGroupLabelHandler.cs" />
+    <Compile Include="ActionFramework\RibbonGroups\PatternBrushGroupImageHandler.cs" />
+    <Compile Include="ActionFramework\RibbonGroups\PatternBrushGroupLabelHandler.cs" />
     <Compile Include="TextCollection\SmartBrowserLabText.cs" />
     <Compile Include="TextCollection\PatternBrushLabText.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelBottomFormat.cs" />

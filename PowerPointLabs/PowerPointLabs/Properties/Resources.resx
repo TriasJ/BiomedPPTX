@@ -814,4 +814,22 @@
   <data name="MinWidth" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\TimerLab\minWidth.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="SmartBrowser" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SmartBrowser.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PatternBrush" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PatternBrush.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="BiomedGroup" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\BiomedGroup.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PatternBrushGroup" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PatternBrushGroup.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ApplyPattern" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ApplyPattern.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="BrushMode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\BrushMode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
