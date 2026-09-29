@@ -12,25 +12,36 @@ namespace PowerPointLabs.ActionFramework.Help
     {
         protected override void ExecuteAction(string ribbonId)
         {
-            string sourceFile = "";
-            switch (Properties.Settings.Default.ReleaseType)
+            string[] searchPaths = new string[]
             {
-                case "dev":
-                    sourceFile = Properties.Settings.Default.DevAddr + CommonText.QuickTutorialFileName;
+                System.IO.Path.Combine(ThisAddIn.AppDataFolder, CommonText.QuickTutorialFileName),
+                System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, CommonText.QuickTutorialFileName),
+                System.IO.Path.Combine(System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location), CommonText.QuickTutorialFileName)
+            };
+
+            string tutorialPath = null;
+            foreach (string path in searchPaths)
+            {
+                if (System.IO.File.Exists(path))
+                {
+                    tutorialPath = path;
                     break;
-                case "release":
-                    sourceFile = Properties.Settings.Default.ReleaseAddr + CommonText.QuickTutorialFileName;
-                    break;
+                }
             }
 
             try
             {
-                if (sourceFile != "")
+                if (tutorialPath != null)
                 {
-                    Process.Start("POWERPNT", sourceFile);
+                    Process.Start("POWERPNT", "\"" + tutorialPath + "\"");
+                }
+                else
+                {
+                    Process.Start(CommonText.HelpDocumentUrl);
                 }
             }
-            catch
+            catch (System.Exception)
             {
                 Logger.Log("TutorialButtonClick: Failed to open tutorial file!", ActionFramework.Common.Logger.LogType.Error);
             }
