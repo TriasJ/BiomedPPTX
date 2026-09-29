@@ -200,6 +200,7 @@ namespace PowerPointLabs
 
         public string GetCustomUI(string ribbonId)
         {
+            ThisAddIn.DeploySqliteInteropStatic();
             EnsureFactoriesInitialized();
             return GetResourceText("PowerPointLabs.Ribbon1.xml");
         }

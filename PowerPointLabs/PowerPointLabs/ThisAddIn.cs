@@ -356,6 +356,11 @@ namespace PowerPointLabs
             return Ribbon;
         }
 
+        public static void DeploySqliteInteropStatic()
+        {
+            DeploySqliteInterop();
+        }
+
         private static void DeploySqliteInterop()
         {
             try
