@@ -50,6 +50,19 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator
                             AudioSettingService.selectedVoice as WatsonVoice);
                         break;
                     case VoiceType.AiTtsVoice:
+                        try
+                        {
+                            System.IO.File.AppendAllText(
+                                System.IO.Path.Combine(System.IO.Path.GetTempPath(), "BiomedPPTX_EdgeTTS_Debug.txt"),
+                                System.DateTime.Now.ToString("HH:mm:ss") + " TextToSpeech routing to AiTts: voice="
+                                + (AudioSettingService.selectedVoice != null ? AudioSettingService.selectedVoice.VoiceName : "NULL")
+                                + " text=" + textToSave.Substring(0, System.Math.Min(textToSave.Length, 50))
+                                + " file=" + filePath + "\r\n");
+                        }
+                        catch (System.Exception)
+                        {
+                        }
+
                         AiTtsRuntimeService.SaveStringToWaveFile(textToSave, filePath,
                             AudioSettingService.selectedVoice as AiTtsVoice);
                         break;

@@ -91,23 +91,44 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
 
         public void Synthesize(string text, string voiceName, string outputFilePath)
         {
+            Log("=== Synthesize START ===");
+            Log("Text: " + (text != null ? text.Substring(0, Math.Min(text.Length, 80)) : "NULL"));
+            Log("Voice: " + voiceName);
+            Log("Output: " + outputFilePath);
+
             string tempMp3 = Path.Combine(Path.GetTempPath(),
                 "biomedpptx_tts_" + Guid.NewGuid().ToString("N") + ".mp3");
 
             try
             {
+                Log("Starting WebSocket task...");
                 Task<byte[]> task = Task.Run(() => SynthesizeViaWebSocket(text, voiceName));
                 byte[] audioData = task.GetAwaiter().GetResult();
+
+                Log("WebSocket returned: " + (audioData != null ? audioData.Length + " bytes" : "NULL"));
 
                 if (audioData != null && audioData.Length > 0)
                 {
                     File.WriteAllBytes(tempMp3, audioData);
+                    Log("MP3 written: " + new FileInfo(tempMp3).Length + " bytes");
+
                     ConvertMp3ToWav(tempMp3, outputFilePath);
+                    Log("WAV written: " + (File.Exists(outputFilePath) ? new FileInfo(outputFilePath).Length + " bytes" : "MISSING"));
+                }
+                else
+                {
+                    Log("ERROR: No audio data received");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("EdgeTTS Synthesize error: " + ex.Message);
+                Log("ERROR: " + ex.GetType().Name + ": " + ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Log("  Inner: " + ex.InnerException.GetType().Name + ": " + ex.InnerException.Message);
+                }
+
+                Log("  Stack: " + ex.StackTrace);
             }
             finally
             {
@@ -122,6 +143,22 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
                     }
                 }
             }
+
+            Log("=== Synthesize END ===");
+        }
+
+        private static string _logPath = Path.Combine(Path.GetTempPath(), "BiomedPPTX_EdgeTTS_Debug.txt");
+
+        private static void Log(string message)
+        {
+            try
+            {
+                File.AppendAllText(_logPath,
+                    DateTime.Now.ToString("HH:mm:ss.fff") + " " + message + "\r\n");
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private static async Task<byte[]> SynthesizeViaWebSocket(string text, string voiceName)
@@ -129,15 +166,22 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             string connectionId = Guid.NewGuid().ToString("N");
             string wsUrl = WsBaseUrl + "&ConnectionId=" + connectionId;
 
+            Log("WebSocket connecting to: " + wsUrl.Substring(0, 80) + "...");
+
             using (ClientWebSocket ws = new ClientWebSocket())
             {
-                ws.Options.SetRequestHeader("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
-                ws.Options.SetRequestHeader("Origin",
-                    "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold");
+                try
+                {
+                    ws.Options.SetRequestHeader("Origin",
+                        "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold");
+                }
+                catch (Exception)
+                {
+                }
 
                 CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 await ws.ConnectAsync(new Uri(wsUrl), cts.Token).ConfigureAwait(false);
+                Log("WebSocket connected, state: " + ws.State);
 
                 string timestamp = DateTime.UtcNow.ToString("ddd MMM dd yyyy HH:mm:ss");
 
