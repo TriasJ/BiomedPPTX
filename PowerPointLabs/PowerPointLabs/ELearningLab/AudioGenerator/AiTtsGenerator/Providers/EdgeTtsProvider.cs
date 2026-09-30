@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.WebSockets;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -272,6 +273,28 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
                     ws.Options.SetRequestHeader("Accept-Language", "en-US,en;q=0.9");
                     ws.Options.SetRequestHeader("Cookie",
                         "muid=" + GenerateMuid() + ";");
+
+                    FieldInfo headersField = ws.Options.GetType().GetField("_requestHeaders",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (headersField != null)
+                    {
+                        WebHeaderCollection headers = headersField.GetValue(ws.Options) as WebHeaderCollection;
+                        if (headers != null)
+                        {
+                            MethodInfo addMethod = typeof(WebHeaderCollection).GetMethod("AddWithoutValidate",
+                                BindingFlags.NonPublic | BindingFlags.Instance);
+                            if (addMethod != null)
+                            {
+                                object[] invokeArgs = new object[]
+                                {
+                                    "User-Agent",
+                                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+                                };
+                                addMethod.Invoke(headers, invokeArgs);
+                                Log("User-Agent set via reflection");
+                            }
+                        }
+                    }
                 }
                 catch (Exception)
                 {
