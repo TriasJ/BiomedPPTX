@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
@@ -88,35 +89,22 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
 
             try
             {
-                string escapedText = text.Replace("\"", "'").Replace("\r", " ").Replace("\n", " ");
+                string cleanText = text.Replace("\r", " ").Replace("\n", " ");
 
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = "python",
-                    Arguments = string.Format(
-                        "-m edge_tts --text \"{0}\" --voice {1} --write-media \"{2}\"",
-                        escapedText,
-                        voiceName,
-                        tempMp3),
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
+                EdgeTTS.Communicate communicate = new EdgeTTS.Communicate(
+                    cleanText, voiceName, null, null, null, null);
 
-                Process process = Process.Start(startInfo);
-                if (process != null)
-                {
-                    process.WaitForExit(30000);
-                }
+                Task saveTask = communicate.Save(tempMp3, CancellationToken.None);
+                saveTask.GetAwaiter().GetResult();
 
                 if (File.Exists(tempMp3) && new FileInfo(tempMp3).Length > 0)
                 {
                     ConvertMp3ToWav(tempMp3, outputFilePath);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine("EdgeTTS Synthesize error: " + ex.Message);
             }
             finally
             {
@@ -141,5 +129,4 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             }
         }
     }
-
 }
