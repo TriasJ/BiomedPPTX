@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,9 +13,15 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
 {
     public class EdgeTtsProvider : IAiTtsProvider
     {
+        private const string TrustedToken = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
+
         private const string VoiceListUrl =
-            "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list" +
-            "?trustedclienttoken=6A5AA1D4EAFF4E9FB37E23D68491D6F4";
+            "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list"
+            + "?trustedclienttoken=" + TrustedToken;
+
+        private const string WsBaseUrl =
+            "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1"
+            + "?TrustedClientToken=" + TrustedToken;
 
         private List<AiTtsVoice> _cachedVoices;
 
@@ -57,12 +65,9 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
                     {
                         foreach (EdgeVoiceInfo v in voices)
                         {
+                            string name = v.FriendlyName != null ? v.FriendlyName : v.ShortName;
                             _cachedVoices.Add(new AiTtsVoice(
-                                v.FriendlyName,
-                                v.ShortName,
-                                v.Locale,
-                                v.Gender,
-                                "Edge TTS"));
+                                name, v.ShortName, v.Locale, v.Gender, "Edge TTS"));
                         }
                     }
                 }
@@ -74,9 +79,11 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
                 _cachedVoices.Add(new AiTtsVoice(
                     "Guy (US English)", "en-US-GuyNeural", "en-US", "Male", "Edge TTS"));
                 _cachedVoices.Add(new AiTtsVoice(
+                    "Jenny (US English)", "en-US-JennyNeural", "en-US", "Female", "Edge TTS"));
+                _cachedVoices.Add(new AiTtsVoice(
                     "Dalia (Mexican Spanish)", "es-MX-DaliaNeural", "es-MX", "Female", "Edge TTS"));
                 _cachedVoices.Add(new AiTtsVoice(
-                    "Xiaoxiao (Chinese)", "zh-CN-XiaoxiaoNeural", "zh-CN", "Female", "Edge TTS"));
+                    "Jorge (Mexican Spanish)", "es-MX-JorgeNeural", "es-MX", "Male", "Edge TTS"));
             }
 
             return _cachedVoices;
@@ -85,20 +92,16 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
         public void Synthesize(string text, string voiceName, string outputFilePath)
         {
             string tempMp3 = Path.Combine(Path.GetTempPath(),
-                "biomedpptx_tts_" + DateTime.Now.Ticks.ToString() + ".mp3");
+                "biomedpptx_tts_" + Guid.NewGuid().ToString("N") + ".mp3");
 
             try
             {
-                string cleanText = text.Replace("\r", " ").Replace("\n", " ");
+                Task<byte[]> task = Task.Run(() => SynthesizeViaWebSocket(text, voiceName));
+                byte[] audioData = task.GetAwaiter().GetResult();
 
-                EdgeTTS.Communicate communicate = new EdgeTTS.Communicate(
-                    cleanText, voiceName, null, null, null, null);
-
-                Task saveTask = communicate.Save(tempMp3, CancellationToken.None);
-                saveTask.GetAwaiter().GetResult();
-
-                if (File.Exists(tempMp3) && new FileInfo(tempMp3).Length > 0)
+                if (audioData != null && audioData.Length > 0)
                 {
+                    File.WriteAllBytes(tempMp3, audioData);
                     ConvertMp3ToWav(tempMp3, outputFilePath);
                 }
             }
@@ -119,6 +122,145 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
                     }
                 }
             }
+        }
+
+        private static async Task<byte[]> SynthesizeViaWebSocket(string text, string voiceName)
+        {
+            string connectionId = Guid.NewGuid().ToString("N");
+            string wsUrl = WsBaseUrl + "&ConnectionId=" + connectionId;
+
+            using (ClientWebSocket ws = new ClientWebSocket())
+            {
+                ws.Options.SetRequestHeader("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                ws.Options.SetRequestHeader("Origin",
+                    "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold");
+
+                CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                await ws.ConnectAsync(new Uri(wsUrl), cts.Token).ConfigureAwait(false);
+
+                string timestamp = DateTime.UtcNow.ToString("ddd MMM dd yyyy HH:mm:ss");
+
+                string configMsg = "X-Timestamp:" + timestamp + "\r\n"
+                    + "Content-Type:application/json; charset=utf-8\r\n"
+                    + "Path:speech.config\r\n\r\n"
+                    + "{\"context\":{\"synthesis\":{\"audio\":{\"metadataoptions\":"
+                    + "{\"sentenceBoundaryEnabled\":\"false\",\"wordBoundaryEnabled\":\"false\"},"
+                    + "\"outputFormat\":\"audio-24khz-48kbitrate-mono-mp3\"}}}}";
+
+                byte[] configBytes = Encoding.UTF8.GetBytes(configMsg);
+                await ws.SendAsync(
+                    new ArraySegment<byte>(configBytes),
+                    WebSocketMessageType.Text, true, cts.Token).ConfigureAwait(false);
+
+                string escapedText = text
+                    .Replace("&", "&amp;")
+                    .Replace("<", "&lt;")
+                    .Replace(">", "&gt;")
+                    .Replace("\r", " ")
+                    .Replace("\n", " ");
+
+                string ssml = "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">"
+                    + "<voice name=\"" + voiceName + "\">"
+                    + "<prosody pitch=\"+0Hz\" rate=\"+0%\" volume=\"+0%\">"
+                    + escapedText
+                    + "</prosody></voice></speak>";
+
+                string ssmlMsg = "X-RequestId:" + connectionId + "\r\n"
+                    + "Content-Type:application/ssml+xml\r\n"
+                    + "X-Timestamp:" + timestamp + "\r\n"
+                    + "Path:ssml\r\n\r\n" + ssml;
+
+                byte[] ssmlBytes = Encoding.UTF8.GetBytes(ssmlMsg);
+                await ws.SendAsync(
+                    new ArraySegment<byte>(ssmlBytes),
+                    WebSocketMessageType.Text, true, cts.Token).ConfigureAwait(false);
+
+                byte[] separatorBytes = Encoding.UTF8.GetBytes("\r\n\r\n");
+
+                using (MemoryStream audioStream = new MemoryStream())
+                {
+                    byte[] buffer = new byte[8192];
+                    bool done = false;
+
+                    while (!done && ws.State == WebSocketState.Open)
+                    {
+                        WebSocketReceiveResult result = await ws.ReceiveAsync(
+                            new ArraySegment<byte>(buffer), cts.Token).ConfigureAwait(false);
+
+                        if (result.MessageType == WebSocketMessageType.Binary)
+                        {
+                            int sepIndex = FindBytes(buffer, separatorBytes, 0, result.Count);
+                            if (sepIndex >= 0)
+                            {
+                                int audioStart = sepIndex + separatorBytes.Length;
+                                int audioLen = result.Count - audioStart;
+                                if (audioLen > 0)
+                                {
+                                    audioStream.Write(buffer, audioStart, audioLen);
+                                }
+                            }
+                            else
+                            {
+                                audioStream.Write(buffer, 0, result.Count);
+                            }
+
+                            while (!result.EndOfMessage)
+                            {
+                                result = await ws.ReceiveAsync(
+                                    new ArraySegment<byte>(buffer), cts.Token).ConfigureAwait(false);
+                                audioStream.Write(buffer, 0, result.Count);
+                            }
+                        }
+                        else if (result.MessageType == WebSocketMessageType.Text)
+                        {
+                            StringBuilder textBuilder = new StringBuilder();
+                            textBuilder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                            while (!result.EndOfMessage)
+                            {
+                                result = await ws.ReceiveAsync(
+                                    new ArraySegment<byte>(buffer), cts.Token).ConfigureAwait(false);
+                                textBuilder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                            }
+
+                            if (textBuilder.ToString().Contains("Path:turn.end"))
+                            {
+                                done = true;
+                            }
+                        }
+                        else if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            done = true;
+                        }
+                    }
+
+                    return audioStream.ToArray();
+                }
+            }
+        }
+
+        private static int FindBytes(byte[] haystack, byte[] needle, int start, int length)
+        {
+            int end = start + length - needle.Length;
+            for (int i = start; i <= end; i++)
+            {
+                bool found = true;
+                for (int j = 0; j < needle.Length; j++)
+                {
+                    if (haystack[i + j] != needle[j])
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         private static void ConvertMp3ToWav(string mp3Path, string wavPath)
