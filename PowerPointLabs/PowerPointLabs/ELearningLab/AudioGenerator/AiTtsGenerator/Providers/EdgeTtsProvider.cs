@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.WebSockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,9 +20,8 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list"
             + "?trustedclienttoken=" + TrustedToken;
 
-        private const string WsBaseUrl =
-            "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1"
-            + "?TrustedClientToken=" + TrustedToken;
+        private const string WsEndpoint =
+            "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1";
 
         private List<AiTtsVoice> _cachedVoices;
 
@@ -161,10 +161,41 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             }
         }
 
+        private static string GenerateSecMsGec()
+        {
+            long windowsEpochOffset = 11644473600L;
+            long unixTime = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+            long ticks = (unixTime + windowsEpochOffset) * 10000000L;
+            long rounded = ticks - (ticks % 3000000000L);
+            string input = rounded.ToString() + TrustedToken;
+
+            using (SHA256 sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in hash)
+                {
+                    sb.Append(b.ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        private static string BuildWsUrl(string connectionId)
+        {
+            string secGec = GenerateSecMsGec();
+            return WsEndpoint
+                + "?TrustedClientToken=" + TrustedToken
+                + "&Sec-MS-GEC=" + secGec
+                + "&Sec-MS-GEC-Version=1-130.0.2849.68"
+                + "&ConnectionId=" + connectionId;
+        }
+
         private static async Task<byte[]> SynthesizeViaWebSocket(string text, string voiceName)
         {
             string connectionId = Guid.NewGuid().ToString("N");
-            string wsUrl = WsBaseUrl + "&ConnectionId=" + connectionId;
+            string wsUrl = BuildWsUrl(connectionId);
 
             Log("WebSocket connecting to: " + wsUrl.Substring(0, 80) + "...");
 
