@@ -101,34 +101,44 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
 
             try
             {
-                Log("Starting WebSocket task...");
+                Log("Trying WebSocket...");
                 Task<byte[]> task = Task.Run(() => SynthesizeViaWebSocket(text, voiceName));
                 byte[] audioData = task.GetAwaiter().GetResult();
-
-                Log("WebSocket returned: " + (audioData != null ? audioData.Length + " bytes" : "NULL"));
 
                 if (audioData != null && audioData.Length > 0)
                 {
                     File.WriteAllBytes(tempMp3, audioData);
-                    Log("MP3 written: " + new FileInfo(tempMp3).Length + " bytes");
-
+                    Log("WebSocket OK: " + audioData.Length + " bytes");
                     ConvertMp3ToWav(tempMp3, outputFilePath);
                     Log("WAV written: " + (File.Exists(outputFilePath) ? new FileInfo(outputFilePath).Length + " bytes" : "MISSING"));
+                    return;
                 }
-                else
-                {
-                    Log("ERROR: No audio data received");
-                }
+
+                Log("WebSocket returned no data");
             }
             catch (Exception ex)
             {
-                Log("ERROR: " + ex.GetType().Name + ": " + ex.Message);
-                if (ex.InnerException != null)
+                Log("WebSocket failed: " + ex.GetType().Name + ": " + ex.Message);
+            }
+
+            try
+            {
+                Log("Falling back to edge-tts CLI...");
+                SynthesizeViaCli(text, voiceName, tempMp3);
+
+                if (File.Exists(tempMp3) && new FileInfo(tempMp3).Length > 0)
                 {
-                    Log("  Inner: " + ex.InnerException.GetType().Name + ": " + ex.InnerException.Message);
+                    Log("CLI MP3: " + new FileInfo(tempMp3).Length + " bytes");
+                    ConvertMp3ToWav(tempMp3, outputFilePath);
+                    Log("WAV written: " + (File.Exists(outputFilePath) ? new FileInfo(outputFilePath).Length + " bytes" : "MISSING"));
+                    return;
                 }
 
-                Log("  Stack: " + ex.StackTrace);
+                Log("CLI produced no audio");
+            }
+            catch (Exception ex2)
+            {
+                Log("CLI also failed: " + ex2.GetType().Name + ": " + ex2.Message);
             }
             finally
             {
@@ -145,6 +155,38 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             }
 
             Log("=== Synthesize END ===");
+        }
+
+        private static void SynthesizeViaCli(string text, string voiceName, string outputMp3)
+        {
+            string escapedText = text.Replace("\"", "'").Replace("\r", " ").Replace("\n", " ");
+            string args = string.Format(
+                "-m edge_tts --text \"{0}\" --voice {1} --write-media \"{2}\"",
+                escapedText, voiceName, outputMp3);
+
+            Log("CLI args: python " + args.Substring(0, System.Math.Min(args.Length, 100)));
+
+            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "python",
+                Arguments = args,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using (System.Diagnostics.Process proc = System.Diagnostics.Process.Start(startInfo))
+            {
+                string stderr = proc.StandardError.ReadToEnd();
+                proc.WaitForExit(30000);
+
+                Log("CLI exit code: " + proc.ExitCode);
+                if (!string.IsNullOrEmpty(stderr))
+                {
+                    Log("CLI stderr: " + stderr.Substring(0, System.Math.Min(stderr.Length, 200)));
+                }
+            }
         }
 
         private static string _logPath = Path.Combine(Path.GetTempPath(), "BiomedPPTX_EdgeTTS_Debug.txt");
