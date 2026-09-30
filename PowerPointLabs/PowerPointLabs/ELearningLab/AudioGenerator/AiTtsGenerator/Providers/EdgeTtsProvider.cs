@@ -163,15 +163,17 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
 
         private static string GenerateSecMsGec()
         {
-            long windowsEpochOffset = 11644473600L;
-            long unixTime = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-            long ticks = (unixTime + windowsEpochOffset) * 10000000L;
-            long rounded = ticks - (ticks % 3000000000L);
-            string input = rounded.ToString() + TrustedToken;
+            long winEpoch = 11644473600L;
+            double unixTime = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+            double ticks = unixTime + winEpoch;
+            ticks -= ticks % 300;
+            ticks *= 1e9 / 100;
+
+            string input = string.Format("{0:F0}{1}", ticks, TrustedToken);
 
             using (SHA256 sha = SHA256.Create())
             {
-                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                byte[] hash = sha.ComputeHash(Encoding.ASCII.GetBytes(input));
                 StringBuilder sb = new StringBuilder();
                 foreach (byte b in hash)
                 {
@@ -182,13 +184,30 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             }
         }
 
+        private static string GenerateMuid()
+        {
+            byte[] bytes = new byte[16];
+            using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(bytes);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in bytes)
+            {
+                sb.Append(b.ToString("X2"));
+            }
+
+            return sb.ToString();
+        }
+
         private static string BuildWsUrl(string connectionId)
         {
             string secGec = GenerateSecMsGec();
             return WsEndpoint
                 + "?TrustedClientToken=" + TrustedToken
                 + "&Sec-MS-GEC=" + secGec
-                + "&Sec-MS-GEC-Version=1-130.0.2849.68"
+                + "&Sec-MS-GEC-Version=1-143.0.3650.75"
                 + "&ConnectionId=" + connectionId;
         }
 
@@ -205,6 +224,8 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
                 {
                     ws.Options.SetRequestHeader("Origin",
                         "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold");
+                    ws.Options.SetRequestHeader("Cookie",
+                        "muid=" + GenerateMuid() + ";");
                 }
                 catch (Exception)
                 {
