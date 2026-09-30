@@ -783,6 +783,12 @@
     <Compile Include="ELearningLab\Extensions\UriExtensions.cs" />
     <Compile Include="ELearningLab\Service\AudioRuntimeService\AzureRuntimeService.cs" />
     <Compile Include="ELearningLab\Service\AudioRuntimeService\WatsonRuntimeService.cs" />
+    <Compile Include="ELearningLab\Service\AiTtsRuntimeService.cs" />
+    <Compile Include="ELearningLab\AudioGenerator\AiTtsGenerator\IAiTtsProvider.cs" />
+    <Compile Include="ELearningLab\AudioGenerator\AiTtsGenerator\AiTtsVoice.cs" />
+    <Compile Include="ELearningLab\AudioGenerator\AiTtsGenerator\AiTtsProviderRegistry.cs" />
+    <Compile Include="ELearningLab\AudioGenerator\AiTtsGenerator\Providers\EdgeTtsProvider.cs" />
+    <Compile Include="ELearningLab\AudioGenerator\AiTtsGenerator\Providers\EdgeVoiceInfo.cs" />
     <Compile Include="ELearningLab\Service\StorageService\AudioSettingStorageService.cs" />
     <Compile Include="ELearningLab\Service\StorageService\ELearningLabTextStorageService.cs" />
     <Compile Include="ELearningLab\Service\StorageService\WatsonAccountStorageService.cs" />

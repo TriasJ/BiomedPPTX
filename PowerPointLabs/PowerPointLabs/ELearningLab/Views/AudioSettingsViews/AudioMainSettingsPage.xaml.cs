@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using PowerPointLabs.ELearningLab.AudioGenerator;
+using PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator;
 using PowerPointLabs.ELearningLab.AudioGenerator.WatsonVoiceGenerator.Model;
 using PowerPointLabs.ELearningLab.Service;
 using PowerPointLabs.ELearningLab.Service.StorageService;
@@ -36,6 +37,10 @@ namespace PowerPointLabs.ELearningLab.Views
                 {
                     return VoiceType.AzureVoice;
                 }
+                else if ((bool)RadioAiTtsVoice.IsChecked)
+                {
+                    return VoiceType.AiTtsVoice;
+                }
                 else
                 {
                     return VoiceType.WatsonVoice;
@@ -54,6 +59,10 @@ namespace PowerPointLabs.ELearningLab.Views
                 else if ((bool)RadioAzureVoice.IsChecked)
                 {
                     return azureVoiceComboBox.SelectedItem as AzureVoice;
+                }
+                else if ((bool)RadioAiTtsVoice.IsChecked)
+                {
+                    return aiTtsVoiceComboBox.SelectedItem as AiTtsVoice;
                 }
                 else
                 {
@@ -79,6 +88,8 @@ namespace PowerPointLabs.ELearningLab.Views
             computerVoiceComboBox.DisplayMemberPath = "Voice";
             watsonVoiceComboBox.ItemsSource = WatsonRuntimeService.Voices;
             watsonVoiceComboBox.DisplayMemberPath = "Voice";
+            aiTtsVoiceComboBox.ItemsSource = AiTtsRuntimeService.Voices;
+            aiTtsVoiceComboBox.DisplayMemberPath = "Voice";
             Voices = LoadVoices();
             audioListView.DataContext = this;
             audioListView.ItemsSource = Voices;
@@ -106,6 +117,10 @@ namespace PowerPointLabs.ELearningLab.Views
                 case VoiceType.WatsonVoice:
                     RadioWatsonVoice.IsChecked = true;
                     watsonVoiceComboBox.SelectedItem = selectedVoice as WatsonVoice;
+                    break;
+                case VoiceType.AiTtsVoice:
+                    RadioAiTtsVoice.IsChecked = true;
+                    aiTtsVoiceComboBox.SelectedItem = selectedVoice as AiTtsVoice;
                     break;
                 default:
                     break;

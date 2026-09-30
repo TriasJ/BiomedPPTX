@@ -5,6 +5,7 @@
         AzureVoice,
         ComputerVoice,
         WatsonVoice,
+        AiTtsVoice,
         DefaultVoice
     }
 }

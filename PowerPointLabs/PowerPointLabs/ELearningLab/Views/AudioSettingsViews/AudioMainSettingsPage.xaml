@@ -129,6 +129,17 @@
                         Grid.ColumnSpan="2" Click="WatsonVoiceBtn_Click"
                         BorderThickness="0" Background="Transparent" FontWeight="Medium" Height="25" VerticalAlignment="Center"/>
                     </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton Grid.Column="0" x:Name="RadioAiTtsVoice" GroupName="VoiceTypeRadioButton"
+                             Margin="20,10,0,10" FontSize="12">
+                            AI TTS (Edge - Free)
+                        </RadioButton>
+                        <ComboBox Grid.Column="1" x:Name="aiTtsVoiceComboBox" Height="23" Margin="0,10,20,10" SelectedIndex="0"/>
+                    </Grid>
                 </StackPanel>
             </Border>
             <Border Margin="10" BorderBrush="LightSlateGray" BorderThickness="1" CornerRadius="2">

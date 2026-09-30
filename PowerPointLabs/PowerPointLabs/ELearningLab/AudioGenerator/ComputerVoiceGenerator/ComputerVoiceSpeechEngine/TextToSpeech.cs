@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Speech.Synthesis;
 
+using PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator;
 using PowerPointLabs.ELearningLab.Service;
 using PowerPointLabs.Models;
 
@@ -47,6 +48,10 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator
                     case VoiceType.WatsonVoice:
                         WatsonRuntimeService.SaveStringToWaveFile(textToSave, filePath,
                             AudioSettingService.selectedVoice as WatsonVoice);
+                        break;
+                    case VoiceType.AiTtsVoice:
+                        AiTtsRuntimeService.SaveStringToWaveFile(textToSave, filePath,
+                            AudioSettingService.selectedVoice as AiTtsVoice);
                         break;
                     default:
                         break;
