@@ -222,8 +222,12 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             {
                 try
                 {
+                    ws.Options.SetRequestHeader("Pragma", "no-cache");
+                    ws.Options.SetRequestHeader("Cache-Control", "no-cache");
                     ws.Options.SetRequestHeader("Origin",
                         "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold");
+                    ws.Options.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
+                    ws.Options.SetRequestHeader("Accept-Language", "en-US,en;q=0.9");
                     ws.Options.SetRequestHeader("Cookie",
                         "muid=" + GenerateMuid() + ";");
                 }
