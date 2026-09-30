@@ -158,18 +158,47 @@ namespace PowerPointLabs.ELearningLab.AudioGenerator.AiTtsGenerator.Providers
             Log("=== Synthesize END ===");
         }
 
+        private static string FindPythonExe()
+        {
+            string[] candidates = new string[]
+            {
+                Path.Combine(ThisAddIn.AppDataFolder, "Assets", "python-embed", "python.exe"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "python-embed", "python.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "__Scratch", "BiomedPPTX-Installer", "Assets", "python-embed", "python.exe"),
+                "python"
+            };
+
+            foreach (string path in candidates)
+            {
+                if (path == "python")
+                {
+                    return path;
+                }
+
+                if (File.Exists(path))
+                {
+                    Log("Found bundled Python: " + path);
+                    return path;
+                }
+            }
+
+            return "python";
+        }
+
         private static void SynthesizeViaCli(string text, string voiceName, string outputMp3)
         {
+            string pythonExe = FindPythonExe();
             string escapedText = text.Replace("\"", "'").Replace("\r", " ").Replace("\n", " ");
             string args = string.Format(
                 "-m edge_tts --text \"{0}\" --voice {1} --write-media \"{2}\"",
                 escapedText, voiceName, outputMp3);
 
-            Log("CLI args: python " + args.Substring(0, System.Math.Min(args.Length, 100)));
+            Log("CLI: " + pythonExe + " " + args.Substring(0, System.Math.Min(args.Length, 80)));
 
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "python",
+                FileName = pythonExe,
                 Arguments = args,
                 UseShellExecute = false,
                 CreateNoWindow = true,
