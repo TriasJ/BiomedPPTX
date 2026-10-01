@@ -503,11 +503,14 @@
                 getSupertip="GetSupertip"
                 size="large">
             <button id="WavyLineButton" tag="WavyLine"
-                    getLabel="GetLabel" getSupertip="GetSupertip" onAction="OnAction"/>
+                    getLabel="GetLabel" getSupertip="GetSupertip"
+                    imageMso="ShapeCurve" onAction="OnAction"/>
             <button id="BlobButton" tag="Blob"
-                    getLabel="GetLabel" getSupertip="GetSupertip" onAction="OnAction"/>
+                    getLabel="GetLabel" getSupertip="GetSupertip"
+                    imageMso="ShapeCloud" onAction="OnAction"/>
             <button id="GearStarButton" tag="GearStar"
-                    getLabel="GetLabel" getSupertip="GetSupertip" onAction="OnAction"/>
+                    getLabel="GetLabel" getSupertip="GetSupertip"
+                    imageMso="ShapeStar5" onAction="OnAction"/>
           </menu>
 
         </group>
