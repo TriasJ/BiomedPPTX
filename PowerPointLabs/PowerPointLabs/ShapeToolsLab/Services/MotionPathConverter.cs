@@ -17,7 +17,7 @@ namespace PowerPointLabs.ShapeToolsLab.Services
             PowerPoint.Shape pathShape,
             PowerPoint.Slide slide)
         {
-            List<PointF> points = ExtractPoints(pathShape);
+            List<PointF> points = ExtractDensePoints(pathShape, 100);
             if (points.Count < 2)
             {
                 throw new InvalidOperationException("Path shape must have at least 2 points.");
@@ -32,11 +32,28 @@ namespace PowerPointLabs.ShapeToolsLab.Services
             StringBuilder pathStr = new StringBuilder();
             pathStr.Append("M 0.0000 0.0000 ");
 
-            for (int i = 1; i < points.Count; i++)
+            int i = 1;
+            while (i < points.Count - 2)
+            {
+                float x1 = (points[i].X - startX) / slideW;
+                float y1 = (points[i].Y - startY) / slideH;
+                float x2 = (points[i + 1].X - startX) / slideW;
+                float y2 = (points[i + 1].Y - startY) / slideH;
+                float x3 = (points[i + 2].X - startX) / slideW;
+                float y3 = (points[i + 2].Y - startY) / slideH;
+
+                pathStr.AppendFormat(CultureInfo.InvariantCulture,
+                    "C {0:F4} {1:F4} {2:F4} {3:F4} {4:F4} {5:F4} ",
+                    x1, y1, x2, y2, x3, y3);
+                i += 3;
+            }
+
+            while (i < points.Count)
             {
                 float dx = (points[i].X - startX) / slideW;
                 float dy = (points[i].Y - startY) / slideH;
                 pathStr.AppendFormat(CultureInfo.InvariantCulture, "L {0:F4} {1:F4} ", dx, dy);
+                i++;
             }
 
             pathStr.Append("E");
@@ -55,7 +72,37 @@ namespace PowerPointLabs.ShapeToolsLab.Services
             targetShape.Top = targetShape.Top + (startY - targetCY);
         }
 
-        private static List<PointF> ExtractPoints(PowerPoint.Shape shape)
+        private static List<PointF> ExtractDensePoints(PowerPoint.Shape shape, int density)
+        {
+            List<PointF> rawPoints = ExtractRawPoints(shape);
+            if (rawPoints.Count <= 2)
+            {
+                return rawPoints;
+            }
+
+            List<PointF> dense = new List<PointF>();
+            for (int i = 0; i < rawPoints.Count - 1; i++)
+            {
+                int steps = density / rawPoints.Count;
+                if (steps < 3)
+                {
+                    steps = 3;
+                }
+
+                for (int j = 0; j < steps; j++)
+                {
+                    float t = (float)j / steps;
+                    float x = rawPoints[i].X + t * (rawPoints[i + 1].X - rawPoints[i].X);
+                    float y = rawPoints[i].Y + t * (rawPoints[i + 1].Y - rawPoints[i].Y);
+                    dense.Add(new PointF(x, y));
+                }
+            }
+
+            dense.Add(rawPoints[rawPoints.Count - 1]);
+            return dense;
+        }
+
+        private static List<PointF> ExtractRawPoints(PowerPoint.Shape shape)
         {
             List<PointF> points = new List<PointF>();
 

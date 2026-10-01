@@ -130,14 +130,13 @@
                     getImage="GetImage"
                     getSupertip="GetSupertip"
                     onAction="OnAction"/>
+            <menuSeparator id="MotionPathSeparator"/>
+            <button id="ConvertToMotionPathButton"
+                    tag="ConvertToMotionPath"
+                    getLabel="GetLabel"
+                    getSupertip="GetSupertip"
+                    onAction="OnAction"/>
           </menu>
-
-          <button id="ConvertToMotionPathButton"
-                  tag="ConvertToMotionPath"
-                  getLabel="GetLabel"
-                  getSupertip="GetSupertip"
-                  onAction="OnAction"
-                  size="large"/>
 
         </group>
         <group id="AudioGroup"
