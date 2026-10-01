@@ -12,7 +12,7 @@
                       BorderThickness="1"
                       BorderBrush="#0070c0"
                       ResizeMode="CanResizeWithGrip"
-                      Title="PowerPointLabs"
+                      Title="BiomedPPTX"
                       IsMinButtonEnabled="False"
                       IsMaxRestoreButtonEnabled="False"
                       WindowStartupLocation="CenterScreen"
@@ -44,7 +44,7 @@
                      HorizontalAlignment="Left">
             <FlowDocument>
                 <Paragraph>
-                    <Run x:Name="titleText">(TitleText here... PowerPointLabs encountered an error)</Run>
+                    <Run x:Name="titleText">(TitleText here... BiomedPPTX encountered an error)</Run>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
