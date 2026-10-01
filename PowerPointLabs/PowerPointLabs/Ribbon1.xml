@@ -132,6 +132,13 @@
                     onAction="OnAction"/>
           </menu>
 
+          <button id="ConvertToMotionPathButton"
+                  tag="ConvertToMotionPath"
+                  getLabel="GetLabel"
+                  getSupertip="GetSupertip"
+                  onAction="OnAction"
+                  size="large"/>
+
         </group>
         <group id="AudioGroup"
                getLabel="GetLabel"
@@ -486,6 +493,20 @@
                     getSupertip="GetSupertip"
                     getEnabled="GetEnabled"
                     onAction="OnAction"/>
+          </menu>
+
+          <menu id="ShapeGeneratorMenu"
+                tag="ShapeTools"
+                getLabel="GetLabel"
+                getImage="GetImage"
+                getSupertip="GetSupertip"
+                size="large">
+            <button id="WavyLineButton" tag="WavyLine"
+                    getLabel="GetLabel" getSupertip="GetSupertip" onAction="OnAction"/>
+            <button id="BlobButton" tag="Blob"
+                    getLabel="GetLabel" getSupertip="GetSupertip" onAction="OnAction"/>
+            <button id="GearStarButton" tag="GearStar"
+                    getLabel="GetLabel" getSupertip="GetSupertip" onAction="OnAction"/>
           </menu>
 
         </group>

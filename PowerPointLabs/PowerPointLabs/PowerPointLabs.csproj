@@ -942,6 +942,35 @@
     <Compile Include="ActionFramework\RibbonGroups\PatternBrushGroupLabelHandler.cs" />
     <Compile Include="TextCollection\SmartBrowserLabText.cs" />
     <Compile Include="TextCollection\PatternBrushLabText.cs" />
+    <Compile Include="TextCollection\ShapeToolsLabText.cs" />
+    <Compile Include="ShapeToolsLab\Services\WavyLineGenerator.cs" />
+    <Compile Include="ShapeToolsLab\Services\BlobGenerator.cs" />
+    <Compile Include="ShapeToolsLab\Services\GearStarGenerator.cs" />
+    <Compile Include="ShapeToolsLab\Services\MotionPathConverter.cs" />
+    <Compile Include="ShapeToolsLab\Views\WavyLineDialog.xaml.cs">
+      <DependentUpon>WavyLineDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ShapeToolsLab\Views\BlobDialog.xaml.cs">
+      <DependentUpon>BlobDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ShapeToolsLab\Views\GearStarDialog.xaml.cs">
+      <DependentUpon>GearStarDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ActionFramework\ShapeToolsLab\WavyLineActionHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\BlobActionHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\GearStarActionHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\MotionPathActionHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\ShapeToolsMenuLabelHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\WavyLineLabelHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\BlobLabelHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\GearStarLabelHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\MotionPathLabelHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\ShapeToolsMenuSupertipHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\WavyLineSupertipHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\BlobSupertipHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\GearStarSupertipHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\MotionPathSupertipHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\ShapeToolsMenuImageHandler.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelBottomFormat.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelTopFormat.cs" />
     <Compile Include="SyncLab\ObjectFormats\ContourColorFormat.cs" />
@@ -2003,6 +2032,18 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="PatternBrushLab\Views\PatternBrushPaneWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ShapeToolsLab\Views\WavyLineDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ShapeToolsLab\Views\BlobDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ShapeToolsLab\Views\GearStarDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
