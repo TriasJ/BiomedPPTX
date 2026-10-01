@@ -16,6 +16,35 @@ namespace PowerPointLabs.ShapeToolsLab.Views
             InitializeComponent();
         }
 
+        private void ModeChanged(object sender, RoutedEventArgs e)
+        {
+            if (blobPanel == null || badgePanel == null)
+            {
+                return;
+            }
+
+            if (badgeModeRadio.IsChecked == true)
+            {
+                blobPanel.Visibility = Visibility.Collapsed;
+                badgePanel.Visibility = Visibility.Visible;
+                pointCountLabel.Text = "Segments:";
+                pointCountSlider.Minimum = 64;
+                pointCountSlider.Maximum = 512;
+                pointCountSlider.Value = 256;
+                pointCountSlider.TickFrequency = 32;
+            }
+            else
+            {
+                blobPanel.Visibility = Visibility.Visible;
+                badgePanel.Visibility = Visibility.Collapsed;
+                pointCountLabel.Text = "Point Count:";
+                pointCountSlider.Minimum = 5;
+                pointCountSlider.Maximum = 30;
+                pointCountSlider.Value = 10;
+                pointCountSlider.TickFrequency = 1;
+            }
+        }
+
         private void Randomize_Click(object sender, RoutedEventArgs e)
         {
             _seed = new Random().Next(1, 99999);
@@ -36,10 +65,21 @@ namespace PowerPointLabs.ShapeToolsLab.Views
                 float cx = app.ActivePresentation.PageSetup.SlideWidth / 2f;
                 float cy = app.ActivePresentation.PageSetup.SlideHeight / 2f;
                 float radius = (float)radiusSlider.Value;
-                float jitter = (float)jitterSlider.Value;
-                int pointCount = (int)pointCountSlider.Value;
 
-                BlobGenerator.Generate(slide, cx, cy, radius, jitter, pointCount, _seed);
+                if (badgeModeRadio.IsChecked == true)
+                {
+                    int bumpCount = (int)bumpCountSlider.Value;
+                    float bumpHeight = (float)bumpHeightSlider.Value;
+                    int segments = (int)pointCountSlider.Value;
+                    BlobGenerator.GenerateBadge(slide, cx, cy, radius, bumpHeight, bumpCount, segments);
+                }
+                else
+                {
+                    float jitter = (float)jitterSlider.Value;
+                    int pointCount = (int)pointCountSlider.Value;
+                    BlobGenerator.Generate(slide, cx, cy, radius, jitter, pointCount, _seed);
+                }
+
                 Close();
             }
             catch (Exception ex)

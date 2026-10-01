@@ -10,6 +10,36 @@ namespace PowerPointLabs.ShapeToolsLab.Services
 {
     public static class BlobGenerator
     {
+        public static PowerPoint.Shape GenerateBadge(
+            PowerPoint.Slide slide,
+            float cx,
+            float cy,
+            float baseRadius,
+            float bumpHeight,
+            int bumpCount,
+            int segments)
+        {
+            if (segments < 64)
+            {
+                segments = 256;
+            }
+
+            float[,] points = new float[segments + 1, 2];
+
+            for (int i = 0; i <= segments; i++)
+            {
+                double angle = 2.0 * Math.PI * i / segments;
+                float r = baseRadius + (float)Math.Cos(angle * bumpCount) * bumpHeight;
+                points[i, 0] = cx + r * (float)Math.Sin(angle);
+                points[i, 1] = cy + r * -(float)Math.Cos(angle);
+            }
+
+            PowerPoint.Shape shape = slide.Shapes.AddPolyline((object)points);
+            shape.Fill.ForeColor.RGB = 0x4090D0;
+            shape.Line.Visible = MsoTriState.msoFalse;
+            return shape;
+        }
+
         public static PowerPoint.Shape Generate(
             PowerPoint.Slide slide,
             float cx,

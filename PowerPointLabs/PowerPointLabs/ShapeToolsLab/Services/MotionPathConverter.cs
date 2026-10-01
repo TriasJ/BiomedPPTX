@@ -25,36 +25,34 @@ namespace PowerPointLabs.ShapeToolsLab.Services
 
             float slideW = slide.CustomLayout.Width;
             float slideH = slide.CustomLayout.Height;
-            float targetCX = targetShape.Left + targetShape.Width / 2f;
-            float targetCY = targetShape.Top + targetShape.Height / 2f;
+
+            float startX = points[0].X;
+            float startY = points[0].Y;
 
             StringBuilder pathStr = new StringBuilder();
-            for (int i = 0; i < points.Count; i++)
-            {
-                float nx = (points[i].X - targetCX) / slideW;
-                float ny = (points[i].Y - targetCY) / slideH;
+            pathStr.Append("M 0.0000 0.0000 ");
 
-                if (i == 0)
-                {
-                    pathStr.AppendFormat(CultureInfo.InvariantCulture, "M {0:F4} {1:F4} ", nx, ny);
-                }
-                else
-                {
-                    pathStr.AppendFormat(CultureInfo.InvariantCulture, "L {0:F4} {1:F4} ", nx, ny);
-                }
+            for (int i = 1; i < points.Count; i++)
+            {
+                float dx = (points[i].X - startX) / slideW;
+                float dy = (points[i].Y - startY) / slideH;
+                pathStr.AppendFormat(CultureInfo.InvariantCulture, "L {0:F4} {1:F4} ", dx, dy);
             }
 
             pathStr.Append("E");
 
             PowerPoint.Effect effect = slide.TimeLine.MainSequence.AddEffect(
                 targetShape,
-                PowerPoint.MsoAnimEffect.msoAnimEffectCustom,
+                PowerPoint.MsoAnimEffect.msoAnimEffectPathDown,
                 PowerPoint.MsoAnimateByLevel.msoAnimateLevelNone,
                 PowerPoint.MsoAnimTriggerType.msoAnimTriggerOnPageClick);
 
-            PowerPoint.AnimationBehavior behavior = effect.Behaviors.Add(
-                PowerPoint.MsoAnimType.msoAnimTypeMotion);
-            behavior.MotionEffect.Path = pathStr.ToString();
+            effect.Behaviors[1].MotionEffect.Path = pathStr.ToString();
+
+            float targetCX = targetShape.Left + targetShape.Width / 2f;
+            float targetCY = targetShape.Top + targetShape.Height / 2f;
+            targetShape.Left = targetShape.Left + (startX - targetCX);
+            targetShape.Top = targetShape.Top + (startY - targetCY);
         }
 
         private static List<PointF> ExtractPoints(PowerPoint.Shape shape)
