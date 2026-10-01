@@ -130,11 +130,13 @@
                     getImage="GetImage"
                     getSupertip="GetSupertip"
                     onAction="OnAction"/>
-            <menuSeparator id="MotionPathSeparator"/>
+            <menuSeparator id="MotionPathSeparator" title="Motion Path"/>
             <button id="ConvertToMotionPathButton"
                     tag="ConvertToMotionPath"
                     getLabel="GetLabel"
+                    getImage="GetImage"
                     getSupertip="GetSupertip"
+                    getEnabled="GetEnabled"
                     onAction="OnAction"/>
           </menu>
 

@@ -960,6 +960,8 @@
     <Compile Include="ActionFramework\ShapeToolsLab\BlobActionHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\GearStarActionHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\MotionPathActionHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\MotionPathImageHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\MotionPathEnabledHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\ShapeToolsMenuLabelHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\WavyLineLabelHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\BlobLabelHandler.cs" />
