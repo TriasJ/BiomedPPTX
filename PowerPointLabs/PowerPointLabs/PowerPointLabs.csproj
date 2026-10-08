@@ -224,6 +224,9 @@
     <Reference Include="SharpGLTF.Toolkit">
       <HintPath>..\packages\SharpGLTF.Toolkit.1.0.7\lib\netstandard2.0\SharpGLTF.Toolkit.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.10.0.12\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="System.Buffers">
       <HintPath>..\packages\System.Buffers.4.6.1\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
