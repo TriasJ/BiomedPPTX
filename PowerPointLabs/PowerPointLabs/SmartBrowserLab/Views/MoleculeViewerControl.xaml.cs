@@ -524,12 +524,8 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             {
                 try
                 {
-                    string glbPath = _cache.GetCachedGlb(cid);
-                    if (glbPath == null)
-                    {
-                        glbPath = _cache.GetGlbPath(cid);
-                        MoleculeGlbExporter.ExportGlb(compound, glbPath);
-                    }
+                    string glbPath = _cache.GetGlbPath(cid);
+                    MoleculeGlbExporter.ExportGlb(compound, glbPath);
 
                     string finalGlbPath = glbPath;
 

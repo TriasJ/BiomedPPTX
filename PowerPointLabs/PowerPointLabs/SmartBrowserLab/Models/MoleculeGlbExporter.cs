@@ -32,13 +32,11 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 throw new ArgumentNullException("outputPath");
             }
 
-            SceneBuilder scene = new SceneBuilder();
-
             if (compound.Atoms == null || compound.Atoms.AtomIds == null ||
                 compound.Atoms.Elements == null || compound.Coords == null ||
                 compound.Coords.Length == 0)
             {
-                SaveEmptyScene(scene, outputPath);
+                SaveEmptyGlb(outputPath);
                 return;
             }
 
@@ -46,14 +44,14 @@ namespace PowerPointLabs.SmartBrowserLab.Models
             if (coords == null || coords.Conformers == null || coords.Conformers.Length == 0 ||
                 coords.AtomIds == null)
             {
-                SaveEmptyScene(scene, outputPath);
+                SaveEmptyGlb(outputPath);
                 return;
             }
 
             PubChemConformer conformer = coords.Conformers[0];
             if (conformer == null || conformer.X == null || conformer.Y == null || conformer.Z == null)
             {
-                SaveEmptyScene(scene, outputPath);
+                SaveEmptyGlb(outputPath);
                 return;
             }
 
@@ -83,6 +81,10 @@ namespace PowerPointLabs.SmartBrowserLab.Models
             List<int> sphereIndices;
             GenerateIcosphere(1.0f, IcoSubdivisions, out sphereVerts, out sphereNormals, out sphereIndices);
 
+            var mesh = new MeshBuilder<VertexPositionNormal>("molecule");
+
+            Dictionary<int, MaterialBuilder> materialCache = new Dictionary<int, MaterialBuilder>();
+
             foreach (int atomId in compound.Atoms.AtomIds)
             {
                 Vector3 position;
@@ -98,14 +100,19 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 }
 
                 float radius = (float)(ElementData.GetRadius(atomicNumber) * AtomRadiusScale);
-                System.Windows.Media.Color wpfColor = ElementData.GetColor(atomicNumber);
-                Vector4 color = new Vector4(wpfColor.R / 255f, wpfColor.G / 255f, wpfColor.B / 255f, 1f);
 
-                MaterialBuilder material = new MaterialBuilder()
-                    .WithUnlitShader()
-                    .WithBaseColor(color);
+                MaterialBuilder material;
+                if (!materialCache.TryGetValue(atomicNumber, out material))
+                {
+                    System.Windows.Media.Color wpfColor = ElementData.GetColor(atomicNumber);
+                    Vector4 color = new Vector4(wpfColor.R / 255f, wpfColor.G / 255f, wpfColor.B / 255f, 1f);
+                    material = new MaterialBuilder(string.Format("element_{0}", atomicNumber))
+                        .WithMetallicRoughnessShader()
+                        .WithBaseColor(color)
+                        .WithMetallicRoughness(0f, 1f);
+                    materialCache[atomicNumber] = material;
+                }
 
-                var mesh = new MeshBuilder<VertexPositionNormal>("atom_" + atomId);
                 var prim = mesh.UsePrimitive(material);
 
                 for (int i = 0; i < sphereIndices.Count; i += 3)
@@ -123,17 +130,18 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                         new VertexPositionNormal(p1, n1),
                         new VertexPositionNormal(p2, n2));
                 }
-
-                scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             }
 
             if (compound.Bonds != null && compound.Bonds.AtomId1 != null &&
                 compound.Bonds.AtomId2 != null)
             {
                 Vector4 bondColor = new Vector4(0.63f, 0.63f, 0.63f, 1f);
-                MaterialBuilder bondMaterial = new MaterialBuilder()
-                    .WithUnlitShader()
-                    .WithBaseColor(bondColor);
+                MaterialBuilder bondMaterial = new MaterialBuilder("bonds")
+                    .WithMetallicRoughnessShader()
+                    .WithBaseColor(bondColor)
+                    .WithMetallicRoughness(0f, 1f);
+
+                var bondPrim = mesh.UsePrimitive(bondMaterial);
 
                 int bondCount = compound.Bonds.AtomId1.Length;
                 for (int i = 0; i < bondCount; i++)
@@ -161,47 +169,48 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 
                     if (order == 1 || order < 1 || order > 3)
                     {
-                        AddCylinderToScene(scene, bondMaterial, start, end, SingleBondRadius, i);
+                        AddCylinderTriangles(bondPrim, start, end, SingleBondRadius);
                     }
                     else if (order == 2)
                     {
                         Vector3 perp = GetPerpendicular(end - start);
                         Vector3 off = perp * DoubleBondOffset;
-                        AddCylinderToScene(scene, bondMaterial, start + off, end + off, DoubleBondRadius, i * 10);
-                        AddCylinderToScene(scene, bondMaterial, start - off, end - off, DoubleBondRadius, i * 10 + 1);
+                        AddCylinderTriangles(bondPrim, start + off, end + off, DoubleBondRadius);
+                        AddCylinderTriangles(bondPrim, start - off, end - off, DoubleBondRadius);
                     }
                     else if (order == 3)
                     {
                         Vector3 perp = GetPerpendicular(end - start);
                         Vector3 off = perp * TripleBondOffset;
-                        AddCylinderToScene(scene, bondMaterial, start, end, TripleBondRadius, i * 10);
-                        AddCylinderToScene(scene, bondMaterial, start + off, end + off, TripleBondRadius, i * 10 + 1);
-                        AddCylinderToScene(scene, bondMaterial, start - off, end - off, TripleBondRadius, i * 10 + 2);
+                        AddCylinderTriangles(bondPrim, start, end, TripleBondRadius);
+                        AddCylinderTriangles(bondPrim, start + off, end + off, TripleBondRadius);
+                        AddCylinderTriangles(bondPrim, start - off, end - off, TripleBondRadius);
                     }
                 }
             }
 
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
             var model = scene.ToGltf2();
             model.SaveGLB(outputPath);
         }
 
-        private static void SaveEmptyScene(SceneBuilder scene, string outputPath)
+        private static void SaveEmptyGlb(string outputPath)
         {
+            var scene = new SceneBuilder();
             var model = scene.ToGltf2();
             model.SaveGLB(outputPath);
         }
 
-        private static void AddCylinderToScene(
-            SceneBuilder scene, MaterialBuilder material,
-            Vector3 start, Vector3 end, float radius, int id)
+        private static void AddCylinderTriangles(
+            PrimitiveBuilder<MaterialBuilder, VertexPositionNormal, VertexEmpty, VertexEmpty> prim,
+            Vector3 start, Vector3 end, float radius)
         {
             List<Vector3> verts;
             List<Vector3> normals;
             List<int> indices;
             GenerateCylinder(start, end, radius, CylinderSides, out verts, out normals, out indices);
-
-            var mesh = new MeshBuilder<VertexPositionNormal>(string.Format("bond_{0}", id));
-            var prim = mesh.UsePrimitive(material);
 
             for (int i = 0; i < indices.Count; i += 3)
             {
@@ -210,8 +219,6 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     new VertexPositionNormal(verts[indices[i + 1]], normals[indices[i + 1]]),
                     new VertexPositionNormal(verts[indices[i + 2]], normals[indices[i + 2]]));
             }
-
-            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
         }
 
         private static void GenerateIcosphere(
@@ -400,6 +407,11 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 : Vector3.UnitY;
             Vector3 perp = Vector3.Cross(dir, up);
             return Vector3.Normalize(perp);
+        }
+
+        private static IPrimitiveBuilder UsePrimitive(MeshBuilder<VertexPositionNormal> mesh, MaterialBuilder material)
+        {
+            return mesh.UsePrimitive(material);
         }
     }
 }
