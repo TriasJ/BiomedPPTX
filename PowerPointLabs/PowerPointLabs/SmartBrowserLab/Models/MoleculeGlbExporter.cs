@@ -11,7 +11,8 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 {
     public static class MoleculeGlbExporter
     {
-        private const double AtomRadiusScale = 0.4;
+        private const double AtomRadiusScale = 0.65;
+        private const double HydrogenRadiusScale = 0.35;
         private const float SingleBondRadius = 0.08f;
         private const float DoubleBondRadius = 0.06f;
         private const float DoubleBondOffset = 0.1f;
@@ -99,7 +100,8 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     continue;
                 }
 
-                float radius = (float)(ElementData.GetRadius(atomicNumber) * AtomRadiusScale);
+                double scale = atomicNumber == 1 ? HydrogenRadiusScale : AtomRadiusScale;
+                float radius = (float)(ElementData.GetRadius(atomicNumber) * scale);
 
                 MaterialBuilder material;
                 if (!materialCache.TryGetValue(atomicNumber, out material))
@@ -109,7 +111,7 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     material = new MaterialBuilder(string.Format("element_{0}", atomicNumber))
                         .WithMetallicRoughnessShader()
                         .WithBaseColor(color)
-                        .WithMetallicRoughness(0f, 1f);
+                        .WithMetallicRoughness(0.05f, 0.55f);
                     materialCache[atomicNumber] = material;
                 }
 
@@ -139,7 +141,7 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 MaterialBuilder bondMaterial = new MaterialBuilder("bonds")
                     .WithMetallicRoughnessShader()
                     .WithBaseColor(bondColor)
-                    .WithMetallicRoughness(0f, 1f);
+                    .WithMetallicRoughness(0.1f, 0.6f);
 
                 var bondPrim = mesh.UsePrimitive(bondMaterial);
 

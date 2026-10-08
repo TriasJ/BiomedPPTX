@@ -7,7 +7,8 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 {
     public static class MoleculeGeometry
     {
-        private const double AtomRadiusScale = 0.4;
+        private const double AtomRadiusScale = 0.65;
+        private const double HydrogenRadiusScale = 0.35;
         private const double SingleBondRadius = 0.08;
         private const double DoubleBondRadius = 0.06;
         private const double DoubleBondOffset = 0.1;
@@ -90,7 +91,8 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     continue;
                 }
 
-                double radius = ElementData.GetRadius(atomicNumber) * AtomRadiusScale;
+                double rscale = atomicNumber == 1 ? HydrogenRadiusScale : AtomRadiusScale;
+                double radius = ElementData.GetRadius(atomicNumber) * rscale;
                 Color color = ElementData.GetColor(atomicNumber);
 
                 MeshGeometry3D scaledSphere = ScaleAndTranslateMesh(sphereTemplate, radius, position.X, position.Y, position.Z);
