@@ -586,10 +586,12 @@ namespace PowerPointLabs.SmartBrowserLab.Views
                 }
                 catch (Exception ex)
                 {
+                    string errorLog = BuildErrorLog("GLB generation failed", ex);
                     Dispatcher.Invoke(() =>
                     {
                         molStatusText.Text = string.Format("GLB generation failed: {0}", ex.Message);
                     });
+                    WriteErrorLog(errorLog);
                 }
             });
         }
@@ -658,6 +660,67 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             catch (Exception ex)
             {
                 molStatusText.Text = string.Format("Insert failed: {0}", ex.Message);
+            }
+        }
+
+        private static string BuildErrorLog(string context, Exception ex)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine(string.Format("=== {0} ===", context));
+            sb.AppendLine(string.Format("Time: {0}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")));
+
+            Exception current = ex;
+            int depth = 0;
+            while (current != null)
+            {
+                sb.AppendLine(string.Format("--- Exception (depth {0}) ---", depth));
+                sb.AppendLine(string.Format("Type: {0}", current.GetType().FullName));
+                sb.AppendLine(string.Format("Message: {0}", current.Message));
+                sb.AppendLine(string.Format("Stack:\n{0}", current.StackTrace));
+
+                System.Reflection.ReflectionTypeLoadException loadEx =
+                    current as System.Reflection.ReflectionTypeLoadException;
+                if (loadEx != null && loadEx.LoaderExceptions != null)
+                {
+                    foreach (Exception loaderEx in loadEx.LoaderExceptions)
+                    {
+                        sb.AppendLine(string.Format("  LoaderException: {0}", loaderEx.Message));
+                    }
+                }
+
+                System.IO.FileNotFoundException fnfEx = current as System.IO.FileNotFoundException;
+                if (fnfEx != null)
+                {
+                    sb.AppendLine(string.Format("  FileName: {0}", fnfEx.FileName));
+                    sb.AppendLine(string.Format("  FusionLog: {0}", fnfEx.FusionLog));
+                }
+
+                current = current.InnerException;
+                depth++;
+            }
+
+            return sb.ToString();
+        }
+
+        private static void WriteErrorLog(string content)
+        {
+            try
+            {
+                string logDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "BiomedPPTX",
+                    "Logs");
+
+                if (!Directory.Exists(logDir))
+                {
+                    Directory.CreateDirectory(logDir);
+                }
+
+                string logPath = Path.Combine(logDir, "molecule_errors.log");
+                File.AppendAllText(logPath, content + "\n\n");
+            }
+            catch (Exception)
+            {
             }
         }
 
