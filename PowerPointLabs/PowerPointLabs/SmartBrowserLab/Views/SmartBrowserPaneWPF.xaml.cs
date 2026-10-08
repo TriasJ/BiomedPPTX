@@ -797,5 +797,17 @@ namespace PowerPointLabs.SmartBrowserLab.Views
         }
 
         #endregion
+
+        #region Tab Selection
+
+        private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (moleculeViewer != null && mainTabControl.SelectedIndex == 1)
+            {
+                moleculeViewer.EnsureInitialized();
+            }
+        }
+
+        #endregion
     }
 }

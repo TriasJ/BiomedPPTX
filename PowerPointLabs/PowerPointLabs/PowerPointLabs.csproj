@@ -207,11 +207,31 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Tools.Applications.Runtime, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors" />
     <Reference Include="NAudio">
       <HintPath>..\packages\NAudio.1.7.1\lib\net35\NAudio.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpGLTF.Core">
+      <HintPath>..\packages\SharpGLTF.Core.1.0.7\lib\netstandard2.0\SharpGLTF.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpGLTF.Runtime">
+      <HintPath>..\packages\SharpGLTF.Runtime.1.0.7\lib\netstandard2.0\SharpGLTF.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpGLTF.Toolkit">
+      <HintPath>..\packages\SharpGLTF.Toolkit.1.0.7\lib\netstandard2.0\SharpGLTF.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Buffers">
+      <HintPath>..\packages\System.Buffers.4.6.1\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory">
+      <HintPath>..\packages\System.Memory.4.6.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SQLite, Version=1.0.118.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.118.0\lib\net46\System.Data.SQLite.dll</HintPath>
@@ -913,6 +933,31 @@
     <Compile Include="SmartBrowserLab\Models\BioArtItem.cs" />
     <Compile Include="SmartBrowserLab\Models\BioArtFileEndpoint.cs" />
     <Compile Include="SmartBrowserLab\Models\BioArtFetcher.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemResponse.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemCompoundData.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemCompoundId.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemCid.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemAtoms.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemBonds.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemCoords.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemConformer.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemConformerData.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemProperty.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemUrn.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemValue.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemCount.cs" />
+    <Compile Include="SmartBrowserLab\Models\ElementData.cs" />
+    <Compile Include="SmartBrowserLab\Models\ElementInfo.cs" />
+    <Compile Include="SmartBrowserLab\Models\MoleculeGeometry.cs" />
+    <Compile Include="SmartBrowserLab\Models\MoleculeSvgRenderer.cs" />
+    <Compile Include="SmartBrowserLab\Models\MoleculeSearchResult.cs" />
+    <Compile Include="SmartBrowserLab\Models\PubChemClient.cs" />
+    <Compile Include="SmartBrowserLab\Models\MoleculeCache.cs" />
+    <Compile Include="SmartBrowserLab\Models\MoleculeGlbExporter.cs" />
+    <Compile Include="SmartBrowserLab\Views\MoleculeViewModel.cs" />
+    <Compile Include="SmartBrowserLab\Views\MoleculeViewerControl.xaml.cs">
+      <DependentUpon>MoleculeViewerControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SmartBrowserLab\Models\IllustrationViewModel.cs" />
     <Compile Include="SmartBrowserLab\Services\ShapeInserter.cs" />
     <Compile Include="PatternBrushLab\PatternBrushPane.cs">
@@ -947,6 +992,7 @@
     <Compile Include="ShapeToolsLab\Services\BlobGenerator.cs" />
     <Compile Include="ShapeToolsLab\Services\GearStarGenerator.cs" />
     <Compile Include="ShapeToolsLab\Services\MotionPathConverter.cs" />
+    <Compile Include="ShapeToolsLab\Services\ShapeInterpolator.cs" />
     <Compile Include="ShapeToolsLab\Views\WavyLineDialog.xaml.cs">
       <DependentUpon>WavyLineDialog.xaml</DependentUpon>
     </Compile>
@@ -955,6 +1001,9 @@
     </Compile>
     <Compile Include="ShapeToolsLab\Views\GearStarDialog.xaml.cs">
       <DependentUpon>GearStarDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ShapeToolsLab\Views\InterpolateDialog.xaml.cs">
+      <DependentUpon>InterpolateDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ActionFramework\ShapeToolsLab\WavyLineActionHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\BlobActionHandler.cs" />
@@ -972,6 +1021,9 @@
     <Compile Include="ActionFramework\ShapeToolsLab\BlobSupertipHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\GearStarSupertipHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\MotionPathSupertipHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\InterpolateActionHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\InterpolateLabelHandler.cs" />
+    <Compile Include="ActionFramework\ShapeToolsLab\InterpolateSupertipHandler.cs" />
     <Compile Include="ActionFramework\ShapeToolsLab\ShapeToolsMenuImageHandler.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelBottomFormat.cs" />
     <Compile Include="SyncLab\ObjectFormats\BevelTopFormat.cs" />
@@ -2033,6 +2085,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="SmartBrowserLab\Views\MoleculeViewerControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="PatternBrushLab\Views\PatternBrushPaneWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -2046,6 +2102,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ShapeToolsLab\Views\GearStarDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ShapeToolsLab\Views\InterpolateDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

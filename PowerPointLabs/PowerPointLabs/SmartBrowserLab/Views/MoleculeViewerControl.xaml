@@ -1,0 +1,178 @@
+<UserControl x:Class="PowerPointLabs.SmartBrowserLab.Views.MoleculeViewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="300">
+
+    <Grid Background="#F5F5F5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Search bar -->
+        <Grid Grid.Row="0" Margin="8,8,8,4">
+            <TextBox x:Name="molSearchBox"
+                     Height="28"
+                     Padding="24,4,4,4"
+                     FontSize="12"
+                     TextChanged="MolSearchBox_TextChanged"
+                     KeyDown="MolSearchBox_KeyDown"
+                     ToolTip="Search PubChem for molecules by name"/>
+            <TextBlock Text="&#x1F50D;"
+                       IsHitTestVisible="False"
+                       VerticalAlignment="Center"
+                       Margin="6,0,0,0"
+                       FontSize="14"
+                       Foreground="Gray"/>
+            <TextBlock x:Name="molSearchPlaceholder"
+                       Text="Search molecules (e.g., aspirin, caffeine)..."
+                       IsHitTestVisible="False"
+                       VerticalAlignment="Center"
+                       Margin="28,0,0,0"
+                       FontSize="12"
+                       Foreground="#999999"
+                       Visibility="Visible"/>
+        </Grid>
+
+        <!-- Search results list -->
+        <ListBox x:Name="moleculeList"
+                 Grid.Row="1"
+                 MaxHeight="160"
+                 Margin="8,0,8,4"
+                 SelectionMode="Single"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 Background="White"
+                 BorderBrush="#DDDDDD"
+                 BorderThickness="1"
+                 SelectionChanged="MoleculeList_SelectionChanged"
+                 Visibility="Collapsed">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <Image Source="{Binding ThumbnailPath}"
+                               Width="40" Height="40"
+                               Stretch="Uniform"
+                               Margin="0,0,6,0"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DisplayName}"
+                                       FontSize="11" FontWeight="Bold"
+                                       Foreground="#333333"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="200"/>
+                            <TextBlock Text="{Binding Formula}"
+                                       FontSize="10"
+                                       Foreground="#666666"/>
+                        </StackPanel>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- 3D Viewer -->
+        <Grid Grid.Row="2" Margin="8,0,8,4">
+            <Border Background="White" BorderBrush="#DDDDDD" BorderThickness="1">
+                <Grid>
+                    <Viewport3D x:Name="moleculeViewport"
+                                ClipToBounds="True"
+                                MouseLeftButtonDown="Viewport_MouseLeftButtonDown"
+                                MouseLeftButtonUp="Viewport_MouseLeftButtonUp"
+                                MouseMove="Viewport_MouseMove"
+                                MouseWheel="Viewport_MouseWheel">
+                        <Viewport3D.Camera>
+                            <PerspectiveCamera x:Name="camera"
+                                               Position="0,0,20"
+                                               LookDirection="0,0,-1"
+                                               UpDirection="0,1,0"
+                                               FieldOfView="45"/>
+                        </Viewport3D.Camera>
+                        <ModelVisual3D>
+                            <ModelVisual3D.Content>
+                                <Model3DGroup x:Name="lightGroup">
+                                    <AmbientLight Color="#404040"/>
+                                    <DirectionalLight Color="#C0C0C0" Direction="-1,-1,-1"/>
+                                    <DirectionalLight Color="#606060" Direction="1,0.5,0.5"/>
+                                </Model3DGroup>
+                            </ModelVisual3D.Content>
+                        </ModelVisual3D>
+                        <ModelVisual3D x:Name="moleculeModel"/>
+                    </Viewport3D>
+
+                    <!-- Loading overlay -->
+                    <Border x:Name="loadingOverlay" Background="#80FFFFFF" Visibility="Collapsed">
+                        <TextBlock Text="Loading molecule..."
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="12" Foreground="#666666"/>
+                    </Border>
+
+                    <!-- Empty state -->
+                    <TextBlock x:Name="emptyStateText"
+                               Text="Search for a molecule to view its 3D structure"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11" Foreground="#999999"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               Margin="20"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Properties panel -->
+        <StackPanel Grid.Row="3" Margin="8,0,8,4" x:Name="propertiesPanel" Visibility="Collapsed">
+            <TextBlock x:Name="molNameText" FontSize="12" FontWeight="Bold" Foreground="#333333"
+                       TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="molFormulaText" FontSize="11" Foreground="#555555"/>
+            <TextBlock x:Name="molWeightText" FontSize="11" Foreground="#555555"/>
+            <TextBlock x:Name="molIupacText" FontSize="10" Foreground="#777777"
+                       TextTrimming="CharacterEllipsis" MaxHeight="30" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Status bar + Insert buttons -->
+        <Grid Grid.Row="4" Margin="8,0,8,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="molStatusText"
+                       Grid.Column="0"
+                       FontSize="11"
+                       Foreground="#666666"
+                       VerticalAlignment="Center"
+                       Text="Ready"/>
+            <Button x:Name="insertSvgButton"
+                    Grid.Column="1"
+                    Content="SVG"
+                    Width="40" Height="26"
+                    FontSize="10" Margin="2,0"
+                    Click="InsertSvg_Click"
+                    IsEnabled="False"
+                    ToolTip="Insert 2D structure as SVG"/>
+            <Button x:Name="insertImageButton"
+                    Grid.Column="2"
+                    Content="PNG"
+                    Width="40" Height="26"
+                    FontSize="10" Margin="2,0"
+                    Click="InsertImage_Click"
+                    IsEnabled="False"
+                    ToolTip="Insert 3D snapshot as PNG"/>
+            <Button x:Name="insert3DButton"
+                    Grid.Column="3"
+                    Content="3D"
+                    Width="40" Height="26"
+                    FontSize="10" Margin="2,0"
+                    Click="Insert3D_Click"
+                    IsEnabled="False"
+                    ToolTip="Insert as rotatable 3D model (Office 2019+)"/>
+        </Grid>
+    </Grid>
+</UserControl>
