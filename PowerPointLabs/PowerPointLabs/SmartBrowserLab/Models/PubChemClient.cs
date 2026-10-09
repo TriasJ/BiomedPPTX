@@ -93,11 +93,24 @@ namespace PowerPointLabs.SmartBrowserLab.Models
 
         public byte[] Download2DImage(int cid)
         {
+            return Download2DImage(cid, 0);
+        }
+
+        public byte[] Download2DImage(int cid, int size)
+        {
             EnforceRateLimit();
 
             try
             {
-                string url = string.Format("{0}/cid/{1}/PNG", BaseUrl, cid);
+                string url;
+                if (size > 0)
+                {
+                    url = string.Format("{0}/cid/{1}/PNG?image_size={2}x{2}", BaseUrl, cid, size);
+                }
+                else
+                {
+                    url = string.Format("{0}/cid/{1}/PNG", BaseUrl, cid);
+                }
 
                 using (var client = new WebClient())
                 {

@@ -142,6 +142,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="molStatusText"
                        Grid.Column="0"
@@ -149,27 +150,35 @@
                        Foreground="#666666"
                        VerticalAlignment="Center"
                        Text="Ready"/>
-            <Button x:Name="insertSvgButton"
+            <Button x:Name="insert2DButton"
                     Grid.Column="1"
+                    Content="2D"
+                    Width="36" Height="26"
+                    FontSize="10" Margin="1,0"
+                    Click="Insert2D_Click"
+                    IsEnabled="False"
+                    ToolTip="Insert PubChem 2D structure image (hi-res)"/>
+            <Button x:Name="insertSvgButton"
+                    Grid.Column="2"
                     Content="SVG"
-                    Width="40" Height="26"
-                    FontSize="10" Margin="2,0"
+                    Width="36" Height="26"
+                    FontSize="10" Margin="1,0"
                     Click="InsertSvg_Click"
                     IsEnabled="False"
-                    ToolTip="Insert 2D structure as SVG"/>
+                    ToolTip="Insert 2D structure as SVG vector"/>
             <Button x:Name="insertImageButton"
-                    Grid.Column="2"
+                    Grid.Column="3"
                     Content="PNG"
-                    Width="40" Height="26"
-                    FontSize="10" Margin="2,0"
+                    Width="36" Height="26"
+                    FontSize="10" Margin="1,0"
                     Click="InsertImage_Click"
                     IsEnabled="False"
                     ToolTip="Insert 3D snapshot as PNG"/>
             <Button x:Name="insert3DButton"
-                    Grid.Column="3"
+                    Grid.Column="4"
                     Content="3D"
-                    Width="40" Height="26"
-                    FontSize="10" Margin="2,0"
+                    Width="36" Height="26"
+                    FontSize="10" Margin="1,0"
                     Click="Insert3D_Click"
                     IsEnabled="False"
                     ToolTip="Insert as rotatable 3D model (Office 2019+)"/>

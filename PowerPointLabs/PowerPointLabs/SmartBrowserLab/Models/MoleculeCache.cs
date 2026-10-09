@@ -67,6 +67,28 @@ namespace PowerPointLabs.SmartBrowserLab.Models
             File.WriteAllBytes(path, png);
         }
 
+        public string GetCachedHiRes2DImage(int cid)
+        {
+            string path = Path.Combine(_cachePath, string.Format("{0}_hires.png", cid));
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            return null;
+        }
+
+        public void SaveHiRes2DImage(int cid, byte[] png)
+        {
+            string path = Path.Combine(_cachePath, string.Format("{0}_hires.png", cid));
+            File.WriteAllBytes(path, png);
+        }
+
+        public string GetHiRes2DImagePath(int cid)
+        {
+            return Path.Combine(_cachePath, string.Format("{0}_hires.png", cid));
+        }
+
         public string GetCachedGlb(int cid)
         {
             string path = Path.Combine(_cachePath, string.Format("{0}.glb", cid));

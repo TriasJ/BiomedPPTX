@@ -209,6 +209,7 @@ namespace PowerPointLabs.SmartBrowserLab.Views
             molWeightText.Text = string.Format("Weight: {0}", selected.Weight);
             molIupacText.Text = selected.IupacName;
 
+            insert2DButton.IsEnabled = true;
             insertSvgButton.IsEnabled = true;
             insertImageButton.IsEnabled = false;
             insert3DButton.IsEnabled = false;
@@ -444,6 +445,60 @@ namespace PowerPointLabs.SmartBrowserLab.Views
         #endregion
 
         #region Insert Methods
+
+        private void Insert2D_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedMolecule == null)
+            {
+                return;
+            }
+
+            int cid = _selectedMolecule.Cid;
+            string displayName = _selectedMolecule.DisplayName;
+            molStatusText.Text = "Downloading hi-res 2D image...";
+            insert2DButton.IsEnabled = false;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    string imagePath = _cache.GetCachedHiRes2DImage(cid);
+                    if (imagePath == null)
+                    {
+                        byte[] png = _pubChemClient.Download2DImage(cid, 1000);
+                        if (png != null)
+                        {
+                            _cache.SaveHiRes2DImage(cid, png);
+                            imagePath = _cache.GetHiRes2DImagePath(cid);
+                        }
+                    }
+
+                    string finalPath = imagePath;
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (finalPath != null)
+                        {
+                            InsertPictureOnSlide(finalPath);
+                            molStatusText.Text = string.Format("Inserted 2D structure for {0}.", displayName);
+                        }
+                        else
+                        {
+                            molStatusText.Text = "Failed to download 2D image.";
+                        }
+
+                        insert2DButton.IsEnabled = true;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        molStatusText.Text = string.Format("2D insert failed: {0}", ex.Message);
+                        insert2DButton.IsEnabled = true;
+                    });
+                }
+            });
+        }
 
         private void InsertSvg_Click(object sender, RoutedEventArgs e)
         {

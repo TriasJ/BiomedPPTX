@@ -8,12 +8,13 @@ namespace PowerPointLabs.SmartBrowserLab.Models
     public static class MoleculeSvgRenderer
     {
         private const double DefaultPadding = 40.0;
-        private const string BondColor = "#555555";
-        private const double BondStrokeWidth = 2.0;
+        private const string BackgroundColor = "#1a1a2e";
+        private const string BondColor = "#c8c8c8";
+        private const double BondStrokeWidth = 1.8;
         private const double DoubleOffset = 2.5;
         private const double TripleOffset = 3.5;
-        private const double HeteroBackgroundRadius = 12.0;
-        private const double FontSize = 14.0;
+        private const double HeteroBackgroundRadius = 10.0;
+        private const double FontSize = 13.0;
 
         public static string RenderSvg(PubChemCompoundData compound, int width, int height)
         {
@@ -258,7 +259,10 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{0}\" height=\"{1}\" viewBox=\"0 0 {0} {1}\">\n",
                 width,
                 height));
-            sb.Append("  <rect width=\"100%\" height=\"100%\" fill=\"white\"/>\n");
+            sb.Append(string.Format(
+                CultureInfo.InvariantCulture,
+                "  <rect width=\"100%\" height=\"100%\" fill=\"{0}\"/>\n",
+                BackgroundColor));
         }
 
         private static void AppendSvgFooter(StringBuilder sb)
@@ -407,14 +411,15 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                 double sx = TransformX(rawX, minX, scale, offsetX);
                 double sy = TransformY(rawY, minY, maxY, scale, offsetY);
                 string symbol = ElementData.GetSymbol(element);
-                string hexColor = ElementData.GetHexColor(element);
+                string hexColor = GetSvgAtomColor(element);
 
                 sb.Append(string.Format(
                     CultureInfo.InvariantCulture,
-                    "  <circle cx=\"{0:F2}\" cy=\"{1:F2}\" r=\"{2:F2}\" fill=\"white\"/>\n",
+                    "  <circle cx=\"{0:F2}\" cy=\"{1:F2}\" r=\"{2:F2}\" fill=\"{3}\"/>\n",
                     sx,
                     sy,
-                    HeteroBackgroundRadius));
+                    HeteroBackgroundRadius,
+                    BackgroundColor));
 
                 sb.Append(string.Format(
                     CultureInfo.InvariantCulture,
@@ -425,6 +430,31 @@ namespace PowerPointLabs.SmartBrowserLab.Models
                     hexColor,
                     symbol));
             }
+        }
+
+        private static readonly Dictionary<int, string> SvgAtomColors = new Dictionary<int, string>
+        {
+            { 1, "#FFFFFF" },
+            { 6, "#AAAAAA" },
+            { 7, "#4444FF" },
+            { 8, "#FF4444" },
+            { 9, "#66DD44" },
+            { 15, "#FF9933" },
+            { 16, "#FFDD44" },
+            { 17, "#44FF44" },
+            { 35, "#CC4444" },
+            { 53, "#AA44AA" },
+        };
+
+        private static string GetSvgAtomColor(int atomicNumber)
+        {
+            string color;
+            if (SvgAtomColors.TryGetValue(atomicNumber, out color))
+            {
+                return color;
+            }
+
+            return "#FF88CC";
         }
 
         private static void GetPerpendicularOffset(
